@@ -1,0 +1,15 @@
+#!/bin/sh
+
+set -eu
+
+export OPENLANE_TAG=2023.02.14
+export OPENLANE_IMAGE_NAME=efabless/openlane:4cd0986b3ae550cdf7a6d0fba4e0657012f635d8-amd64
+export OPENLANE_ROOT=$(pwd)/OpenLane
+export PDK_ROOT=$(pwd)/PDK
+export PDK=sky130A
+
+# Create and activate python venv
+if [ ! -d ".venv" ]; then
+    python3 -m venv .venv
+fi
+. .venv/bin/activate

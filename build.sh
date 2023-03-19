@@ -2,11 +2,7 @@
 
 set -eux
 
-export OPENLANE_TAG=2023.02.14
-export OPENLANE_IMAGE_NAME=efabless/openlane:4cd0986b3ae550cdf7a6d0fba4e0657012f635d8-amd64
-export OPENLANE_ROOT=$(pwd)/OpenLane
-export PDK_ROOT=$(pwd)/PDK
-export PDK=sky130A
+. ./env
 
 # Check support tools exist
 TT=$(pwd)/tt-support-tools
@@ -14,12 +10,6 @@ if [ ! -d "$TT" ]; then
     echo "Cloning TT support tools repo..."
     git clone https://github.com/tinytapeout/tt-support-tools $TT
 fi
-
-# Create and activate python venv
-if [ ! -d ".venv" ]; then
-    python3 -m venv .venv
-fi
-. .venv/bin/activate
 
 # Install python deps
 pip install -qr $TT/requirements.txt
