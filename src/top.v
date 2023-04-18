@@ -7,8 +7,10 @@ module dratini0_fsk_modem_top(io_out, io_in);
   wire [8:0] \$11 ;
   wire [15:0] \$13 ;
   wire [15:0] \$15 ;
-  wire \$17 ;
+  wire [15:0] \$17 ;
+  wire [15:0] \$19 ;
   wire [8:0] \$2 ;
+  wire \$21 ;
   wire [8:0] \$4 ;
   wire [8:0] \$5 ;
   wire [8:0] \$7 ;
@@ -29,8 +31,8 @@ module dratini0_fsk_modem_top(io_out, io_in);
   wire rst;
   assign \$11  = $signed(_counter4) + $signed(8'h11);
   assign \$13  = $signed(_counter1) * $signed(_counter2);
-  assign \$15  = $signed(_counter3) * $signed(_counter4);
-  assign \$17  = $signed(\$13 ) > $signed(\$15 );
+  assign \$17  = $signed(_counter3) * $signed(_counter4);
+  assign \$21  = $signed(\$15 ) > $signed(\$19 );
   always @(posedge clk)
     _counter1 <= \_counter1$next ;
   always @(posedge clk)
@@ -78,9 +80,11 @@ module dratini0_fsk_modem_top(io_out, io_in);
   assign \$4  = \$5 ;
   assign \$7  = \$8 ;
   assign \$10  = \$11 ;
-  assign io_out[0] = \$17 ;
+  assign io_out[0] = \$21 ;
   assign io_out[7:1] = 7'h00;
   assign rst = io_in[1];
   assign clk = io_in[0];
+  assign \$15  = { \$13 [15], \$13 [15], \$13 [15], \$13 [15], \$13 [15], \$13 [15], \$13 [15], \$13 [15:7] };
+  assign \$19  = { \$17 [15], \$17 [15], \$17 [15], \$17 [15], \$17 [15], \$17 [15], \$17 [15], \$17 [15:7] };
 endmodule
 

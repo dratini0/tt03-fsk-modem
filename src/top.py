@@ -34,7 +34,7 @@ class FSKModemTop(Elaboratable):
             self._counter3.eq(self._counter3 + 13),
             self._counter4.eq(self._counter4 + 17),
         ]
-        m.d.comb += self.io_out[0].eq(self._counter1 * self._counter2 > self._counter3 * self._counter4)
+        m.d.comb += self.io_out[0].eq((self._counter1 * self._counter2 >> 7) > (self._counter3 * self._counter4 >> 7))
 
         return m
 
