@@ -17,7 +17,9 @@ for i, i_clamp_level in enumerate(clamp_level):
     fft = np.abs(rfft(wave_clamped))
     total_power = np.sum(fft * fft)
     fundamental_power = fft[1] * fft[1]
-    thd[i] = np.log10((total_power - fundamental_power) / (fundamental_power)) * 10
+    thd[i] = (
+        np.log10((total_power - fundamental_power) / (fundamental_power)) * 10
+    )  # dB
 
 print(thd)
 plt.plot(clamp_level, thd)

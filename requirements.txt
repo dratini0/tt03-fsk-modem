@@ -2,3 +2,4 @@ amaranth #@ git+https://github.com/amaranth-lang/amaranth.git@5f6b36e91f44c43bd7
 amaranth-cocotb @ git+https://github.com/akukulanski/amaranth-cocotb.git
 cocotb~=1.7.2
 pytest~=7.2.2
+numpy~=1.24.2
