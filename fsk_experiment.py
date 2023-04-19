@@ -30,7 +30,11 @@ prbs9 = list(
 F_S = 12500.0
 
 # Ch 2 of ITU V.21
-F = [1850.0, 1650.0]
+F_C = 1750.0
+# Ch 1 of ITU V.21
+# F_C = 1080.0
+
+F = [F_C + 100.0, F_C - 100.0]
 
 BAUD = 300.0
 
@@ -38,36 +42,36 @@ phase_per_sample = [f / F_S * np.pi * 2 for f in F]
 samples_per_bit = F_S / BAUD
 
 waveform = np.zeros(floor(10 * F_S))
+ref_waveform = np.zeros(floor(10 * F_S))
 
 phase = 0.0
 for i in range(len(waveform)):
     waveform[i] = np.sin(phase)
     phase += phase_per_sample[prbs9[floor(i / samples_per_bit) % len(prbs9)]]
+    ref_waveform[i] = prbs9[floor(i / samples_per_bit) % len(prbs9)]
 
-quantized = np.round(waveform * 7) / 7  # 4 bits
+quantized = np.round(waveform * 1) / 1  # 4 bits
 
-F_C = 1750.0
 i_square = np.float64((np.arange(len(waveform)) * (F_C / F_S)) % 1 >= 0.5) * 2 - 1
 q_square = (
     np.float64((np.arange(len(waveform)) * (F_C / F_S) + 0.25) % 1 >= 0.5) * 2 - 1
 )
 
 # filter_ba = butter(2, BAUD, fs=F_S)
-#filter_ba = [[0.5, 1, 0.5], [ 1.        , round(-1.78743252 * 32) / 32,  round(0.80794959 * 32) / 32]]
-filter_ba = [[1/16, 1/16], [1.0, -15/16]]
+filter_ba = [[0.5, 1, 0.5], [ 1.        , round(-1.78743252 * 32) / 32,  round(0.80794959 * 32) / 32]]
+# filter_ba = [[1/16, 0], [1.0, -15/16]]
 i = lfilter(*filter_ba, i_square * quantized)
 q = lfilter(*filter_ba, q_square * quantized)
-i = lfilter(*filter_ba, i)
-q = lfilter(*filter_ba, q)
-i_ = i[2:] - i[:-2]
-q_ = q[2:] - q[:-2]
-i, q = i[2:], q[2:]
-cross = i * q_ - q * i_
+# i = lfilter(*filter_ba, i)
+# q = lfilter(*filter_ba, q)
+angle = np.unwrap(np.arctan2(q, i))
+angle_rounded =  np.round(angle / (2 * np.pi) * 8)
 
-plt.plot(i[1000:4000], q[1000:4000])
-plt.show()
-plt.plot(i[1000:4000])
-plt.plot(q[1000:4000])
-plt.show()
-plt.plot(cross[1000:4000])
+_, ((constellation_plot, iq_plot, _), (angle_plot, angle_rounded_plot, ref_waveform_plot)) = plt.subplots(2, 3)
+constellation_plot.plot(i[1000:4000], q[1000:4000])
+iq_plot.plot(i[1000:4000])
+iq_plot.plot(q[1000:4000])
+angle_plot.plot(angle[1000:4000])
+angle_rounded_plot.plot(angle_rounded[1000:4000])
+ref_waveform_plot.plot(ref_waveform[1000:4000])
 plt.show()
