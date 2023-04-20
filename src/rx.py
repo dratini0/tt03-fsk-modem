@@ -45,12 +45,12 @@ class RxFilter(Elaboratable):
 
 
 class IQMixer(Elaboratable):
-    def __init__(self):
-        self.in_ = Signal(signed(5))
+    def __init__(self, width):
+        self.in_ = Signal(signed(width))
         self.frequency = Signal(10)
 
-        self.i = Signal(signed(5))
-        self.q = Signal(signed(5))
+        self.i = Signal(signed(width))
+        self.q = Signal(signed(width))
 
         self._phase = Signal(10, reset_less=True)
 
@@ -125,5 +125,85 @@ class PhaseDetector(Elaboratable):
         return [self.i, self.q, self.phase]
 
 
+class PhaseDifferentiator(Elaboratable):
+    def __init__(self):
+        self.phase = Signal(3)
+
+        self.out = Signal(reset_less=True)
+        self.valid = Signal()
+
+        self._last_phase = Signal(3, reset_less=True)
+        self._valid_counter = Signal(10, reset_less=True)
+
+    def elaborate(self, platform):
+        m = Module()
+
+        m.d.comb += self.valid.eq(self._valid_counter == 0x3FF)
+        m.d.sync += self._last_phase.eq(self.phase)
+
+        with m.Switch(self.phase - self._last_phase):
+            with m.Case(0):
+                m.d.sync += self._valid_counter.eq(~self.valid)
+            with m.Case(-1):
+                m.d.sync += [
+                    self._valid_counter.eq(~self.valid),
+                    self.out.eq(1),
+                ]
+            with m.Case(1):
+                m.d.sync += [
+                    self._valid_counter.eq(~self.valid),
+                    self.out.eq(0),
+                ]
+            with m.Default():
+                m.d.sync += self._valid_counter.eq(0)
+
+        return m
+
+    def get_ports(self):
+        return [self.phase, self.out, self.valid]
+
+
+class Rx(Elaboratable):
+    def __init__(self):
+        self.in_ = Signal(signed(5))
+        self.frequency = Signal(10)
+        self.frequency_invert = Signal()
+
+        self.out = Signal()
+        self.valid = Signal()
+
+        self._mixer = IQMixer(5)
+        self._i_filter = RxFilter()
+        self._q_filter = RxFilter()
+        self._phase_detector = PhaseDetector(11)
+        self._phase_differentiator = PhaseDifferentiator()
+
+    def elaborate(self, platform):
+        m = Module()
+
+        m.submodules.mixer = self._mixer
+        m.submodules.i_filter = self._i_filter
+        m.submodules.q_filter = self._q_filter
+        m.submodules.phase_detector = self._phase_detector
+        m.submodules.phase_differentiator = self._phase_differentiator
+
+        m.d.comb += [
+            self._mixer.in_.eq(self.in_),
+            self._mixer.frequency.eq(self.frequency),
+            self._i_filter.in_.eq(self._mixer.i),
+            self._q_filter.in_.eq(self._mixer.q),
+            self._phase_detector.i.eq(self._i_filter.out),
+            self._phase_detector.q.eq(self._q_filter.out),
+            self._phase_differentiator.phase.eq(self._phase_detector.phase),
+            self.out.eq(self._phase_differentiator.out ^ self.frequency_invert),
+            self.valid.eq(self._phase_differentiator.valid),
+        ]
+
+        return m
+
+    def get_ports(self):
+        return [self.in_, self.frequency, self.frequency_invert, self.out, self.valid]
+
+
 if __name__ == "__main__":
-    main(WaveGen(10))
+    main(Rx())
