@@ -21,12 +21,16 @@ class RxFilter(Elaboratable):
         ]
 
         m.d.comb += [
-            self.out.eq((self._v[0] >> 2) + (self._v[1] >> 1) + (self._v[2] >> 2)),
+            self.out.eq(((self._v[0]) + (self._v[1] << 1) + (self._v[2]) + 1) >> 2),
             self._v[0].eq(
-                self.in_
-                + (self.in_ >> 1)
-                + (57 * self._v[1] >> 5)
-                - (26 * self._v[2] >> 5)
+                (
+                    (self.in_ << 3)
+                    + (self.in_ << 2)
+                    + (57 * self._v[1] >> 2)
+                    - (26 * self._v[2] >> 2)
+                    + (1 << 2)
+                )
+                >> 3
             ),
         ]
 
