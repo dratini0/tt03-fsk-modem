@@ -133,6 +133,7 @@ class PhaseDifferentiator(Elaboratable):
         self.valid = Signal()
 
         self._last_phase = Signal(3, reset_less=True)
+        self._valid_counter_reset = Signal(1)
         self._valid_counter = Signal(10, reset_less=True)
 
     def elaborate(self, platform):
@@ -141,21 +142,22 @@ class PhaseDifferentiator(Elaboratable):
         m.d.comb += self.valid.eq(self._valid_counter == 0x3FF)
         m.d.sync += self._last_phase.eq(self.phase)
 
-        with m.Switch(self.phase - self._last_phase):
+        with m.Switch((self.phase - self._last_phase)[:3]):
             with m.Case(0):
-                m.d.sync += self._valid_counter.eq(~self.valid)
+                m.d.comb += self._valid_counter_reset.eq(0)
             with m.Case(-1):
-                m.d.sync += [
-                    self._valid_counter.eq(~self.valid),
-                    self.out.eq(1),
-                ]
+                m.d.sync += self.out.eq(1)
+                m.d.comb += self._valid_counter_reset.eq(0)
             with m.Case(1):
-                m.d.sync += [
-                    self._valid_counter.eq(~self.valid),
-                    self.out.eq(0),
-                ]
+                m.d.sync += self.out.eq(0)
+                m.d.comb += self._valid_counter_reset.eq(0)
             with m.Default():
-                m.d.sync += self._valid_counter.eq(0)
+                m.d.comb += self._valid_counter_reset.eq(1)
+
+        with m.If(self._valid_counter_reset):
+            m.d.sync += self._valid_counter.eq(0)
+        with m.Else():
+            m.d.sync += self._valid_counter.eq(self._valid_counter + ~self.valid)
 
         return m
 
