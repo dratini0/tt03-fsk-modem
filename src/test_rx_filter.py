@@ -19,7 +19,7 @@ from util import cocotb_header
 
 def wrap_int(val):
     val = int(val)
-    return val - 2048 if val > 1024 else val
+    return val - 64 if val > 32 else val
 
 
 @cocotb.test()
@@ -27,7 +27,7 @@ async def impulse_response(dut):
     dut.in_.value = 0
     await cocotb_header(dut)
     result = []
-    dut.in_.value = 15
+    dut.in_.value = 1
     await RisingEdge(dut.clk)
     result.append(wrap_int(dut.out.value))
     dut.in_.value = 0
@@ -41,7 +41,7 @@ async def step_response(dut):
     dut.in_.value = 0
     await cocotb_header(dut)
     result = []
-    dut.in_.value = 15
+    dut.in_.value = 1
     await RisingEdge(dut.clk)
     result.append(wrap_int(dut.out.value))
     for i in range(127):
@@ -60,7 +60,7 @@ async def frequency_response(dut):
     for frequency in range(100, 1001, 100):
         omega = frequency / 12500 * 2 * math.pi
         for i in range(1024):
-            test_signal.append(round(15 * math.sin(phase)))
+            test_signal.append(int(math.sin(phase) >= 0))
             phase += omega
 
     result = []

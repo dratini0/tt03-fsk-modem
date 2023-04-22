@@ -58,7 +58,7 @@ q_square = (
 )
 
 # filter_ba = butter(2, BAUD, fs=F_S)
-filter_ba = [[0.5, 1, 0.5], [ 1.        , round(-1.78743252 * 32) / 32,  round(0.80794959 * 32) / 32]]
+filter_ba = [[1, 0, 0], [ 1.        , round(-1.78743252 * 32) / 32,  round(0.80794959 * 32) / 32]]
 # filter_ba = [[1/16, 0], [1.0, -15/16]]
 i = lfilter(*filter_ba, i_square * quantized)
 q = lfilter(*filter_ba, q_square * quantized)

@@ -54,13 +54,13 @@ async def prbs9_demod(dut):
     phase_per_sample = [f / F_S * np.pi * 2 for f in F]
     samples_per_bit = F_S / BAUD
 
-    waveform = np.zeros(int(len(test_data) * samples_per_bit))
+    waveform = np.zeros(int(len(test_data) * samples_per_bit), dtype=np.int32)
     phase = 0.0
     for i in range(len(waveform)):
-        waveform[i] = np.sin(phase)
+        waveform[i] = int(np.sin(phase) >= 0)
         phase += phase_per_sample[test_data[int(i / samples_per_bit)]]
 
-    waveform = np.int32(np.round(waveform * 15)).tolist()
+    waveform = waveform.tolist()
 
     dut.in_.value = 0
     dut.frequency.value = round(F_C / F_S * 1024)
@@ -93,7 +93,7 @@ async def random_validity(dut):
     result = []
     result_valid = []
     for sample in range(1000):
-        dut.in_.value = randint(0, 31)
+        dut.in_.value = randint(0, 1)
         await RisingEdge(dut.clk)
         result.append(int(dut.out))
         result_valid.append(int(dut.valid))

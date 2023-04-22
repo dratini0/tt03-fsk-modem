@@ -7,10 +7,10 @@ from util import main
 
 class RxFilter(Elaboratable):
     def __init__(self):
-        self.in_ = Signal(signed(5))
-        self.out = Signal(signed(11))
+        self.in_ = Signal(unsigned(1))
+        self.out = Signal(signed(6))
 
-        self._v = [Signal(signed(11), name=f"v_{i}") for i in range(3)]
+        self._v = [Signal(signed(6), name=f"v_{i}") for i in range(3)]
 
     def elaborate(self, platform):
         m = Module()
@@ -21,16 +21,9 @@ class RxFilter(Elaboratable):
         ]
 
         m.d.comb += [
-            self.out.eq(((self._v[0]) + (self._v[1] << 1) + (self._v[2]) + 1) >> 2),
+            self.out.eq((self._v[0])),
             self._v[0].eq(
-                (
-                    (self.in_ << 3)
-                    + (self.in_ << 2)
-                    + (57 * self._v[1] >> 2)
-                    - (26 * self._v[2] >> 2)
-                    + (1 << 2)
-                )
-                >> 3
+                ((self.in_ << 2) + (57 * self._v[1] >> 3) - (26 * self._v[2] >> 3)) >> 2
             ),
         ]
 
@@ -41,7 +34,7 @@ class RxFilter(Elaboratable):
 
     @staticmethod
     def get_iir():
-        return [[1.5 / 4, 1.5 / 2, 1.5 / 4], [1.0, -57 / 32, 26 / 32]]
+        return [[1, 0, 0], [1.0, -57 / 32, 26 / 32]]
 
 
 class IQMixer(Elaboratable):
@@ -167,14 +160,14 @@ class PhaseDifferentiator(Elaboratable):
 
 class Rx(Elaboratable):
     def __init__(self):
-        self.in_ = Signal(signed(5))
+        self.in_ = Signal(1)
         self.frequency = Signal(10)
         self.frequency_invert = Signal()
 
         self.out = Signal()
         self.valid = Signal()
 
-        self._mixer = IQMixer(5)
+        self._mixer = IQMixer(1)
         self._i_filter = RxFilter()
         self._q_filter = RxFilter()
         self._phase_detector = PhaseDetector(11)
