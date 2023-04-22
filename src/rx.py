@@ -1,30 +1,43 @@
 #!/usr/bin/env python3
 
+from functools import reduce
+from operator import __add__
+
 from amaranth import *
+
+import numpy as np
+from scipy.signal import firwin
 
 from util import main
 
 
 class RxFilter(Elaboratable):
-    def __init__(self):
-        self.in_ = Signal(unsigned(1))
-        self.out = Signal(signed(6))
+    def __init__(self, filter_size=31):
+        # Now do this with Verilog.
+        filter_designed = firwin(filter_size, 300, fs=12500)
+        self._filter_exponents = np.int32(
+            np.round(np.log(filter_designed / filter_designed[0]) / np.log(2))
+        )
+        self._filter = np.int32(np.exp2(self._filter_exponents))
 
-        self._v = [Signal(signed(6), name=f"v_{i}") for i in range(3)]
+        self.in_ = Signal(1)
+        self.out = Signal(range(sum(self._filter) + 1))
+
+        self._x = Signal(filter_size - 1, reset_less=True)
 
     def elaborate(self, platform):
         m = Module()
 
-        m.d.sync += [
-            self._v[1].eq(self._v[0]),
-            self._v[2].eq(self._v[1]),
-        ]
+        m.d.sync += [self._x[0].eq(self.in_), self._x[1:].eq(self._x[:-1])]
+
+        result = reduce(
+            __add__,
+            (x << int(e) for (x, e) in zip(self._x, self._filter_exponents[1:])),
+            self.in_,
+        )
 
         m.d.comb += [
-            self.out.eq((self._v[0])),
-            self._v[0].eq(
-                ((self.in_ << 2) + (57 * self._v[1] >> 3) - (26 * self._v[2] >> 3)) >> 2
-            ),
+            self.out.eq(result),
         ]
 
         return m
@@ -32,10 +45,14 @@ class RxFilter(Elaboratable):
     def get_ports(self):
         return [self.in_, self.out]
 
-    @staticmethod
-    def get_iir():
-        return [[1, 0, 0], [1.0, -57 / 32, 26 / 32]]
+    def get_filter(self):
+        return [
+            self._filter,
+            [1.0] + [0.0] * 14,
+        ]
 
+    def get_gain(self):
+        return int(np.sum(self._filter))
 
 class IQMixer(Elaboratable):
     def __init__(self, width):
@@ -170,7 +187,7 @@ class Rx(Elaboratable):
         self._mixer = IQMixer(1)
         self._i_filter = RxFilter()
         self._q_filter = RxFilter()
-        self._phase_detector = PhaseDetector(11)
+        self._phase_detector = PhaseDetector(10)
         self._phase_differentiator = PhaseDifferentiator()
 
     def elaborate(self, platform):
@@ -187,8 +204,8 @@ class Rx(Elaboratable):
             self._mixer.frequency.eq(self.frequency),
             self._i_filter.in_.eq(self._mixer.i),
             self._q_filter.in_.eq(self._mixer.q),
-            self._phase_detector.i.eq(self._i_filter.out),
-            self._phase_detector.q.eq(self._q_filter.out),
+            self._phase_detector.i.eq(self._i_filter.out - self._i_filter.get_gain() // 2),
+            self._phase_detector.q.eq(self._q_filter.out - self._q_filter.get_gain() // 2),
             self._phase_differentiator.phase.eq(self._phase_detector.phase),
             self.out.eq(self._phase_differentiator.out ^ self.frequency_invert),
             self.valid.eq(self._phase_differentiator.valid),

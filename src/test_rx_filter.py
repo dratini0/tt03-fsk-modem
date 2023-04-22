@@ -17,11 +17,6 @@ from rx import RxFilter
 from util import cocotb_header
 
 
-def wrap_int(val):
-    val = int(val)
-    return val - 64 if val > 32 else val
-
-
 @cocotb.test()
 async def impulse_response(dut):
     dut.in_.value = 0
@@ -29,11 +24,11 @@ async def impulse_response(dut):
     result = []
     dut.in_.value = 1
     await RisingEdge(dut.clk)
-    result.append(wrap_int(dut.out.value))
+    result.append(int(dut.out.value))
     dut.in_.value = 0
     for i in range(127):
         await RisingEdge(dut.clk)
-        result.append(wrap_int(dut.out.value))
+        result.append(int(dut.out.value))
 
 
 @cocotb.test()
@@ -43,12 +38,12 @@ async def step_response(dut):
     result = []
     dut.in_.value = 1
     await RisingEdge(dut.clk)
-    result.append(wrap_int(dut.out.value))
+    result.append(int(dut.out.value))
     for i in range(127):
         await RisingEdge(dut.clk)
-        result.append(wrap_int(dut.out.value))
+        result.append(int(dut.out.value))
 
-    assert all(i >= 0 for i in result)  # Check for no overflow
+    # assert all(i >= 0 for i in result)  # Check for no overflow
 
 
 @cocotb.test()
@@ -67,11 +62,11 @@ async def frequency_response(dut):
     for sample in test_signal:
         dut.in_.value = sample
         await RisingEdge(dut.clk)
-        result.append(wrap_int(dut.out.value))
+        result.append(int(dut.out.value))
     test_signal = np.array(test_signal)
     result = np.array(result)
 
-    reference = lfilter(*RxFilter.get_iir(), test_signal)
+    reference = lfilter(*RxFilter().get_filter(), test_signal)
 
     for i in range(0, 10 * 1024, 1024):
         print(i / 1024)
@@ -82,7 +77,7 @@ async def frequency_response(dut):
         assert 0.9 < result_power / reference_power < 1.1
 
 
-def test_wave_gen():
+def test_rx_filter():
     dut = RxFilter()
     run(
         dut,

@@ -6,7 +6,7 @@ import wave
 import numpy as np
 from numpy.fft import rfft
 import matplotlib.pyplot as plt
-from scipy.signal import lfilter, butter
+from scipy.signal import lfilter, firwin
 
 prbs9 = list(
     map(
@@ -58,7 +58,10 @@ q_square = (
 )
 
 # filter_ba = butter(2, BAUD, fs=F_S)
-filter_ba = [[1, 0, 0], [ 1.        , round(-1.78743252 * 32) / 32,  round(0.80794959 * 32) / 32]]
+filter_ = firwin(15, 100, fs=12500)
+filter_approximate = np.exp2(np.round(np.log2(filter_/filter_[0])))
+print(f"Gain: {sum(filter_approximate)}")
+filter_ba = [filter_approximate, [1] + [0] * 14]
 # filter_ba = [[1/16, 0], [1.0, -15/16]]
 i = lfilter(*filter_ba, i_square * quantized)
 q = lfilter(*filter_ba, q_square * quantized)
