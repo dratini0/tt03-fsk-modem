@@ -79,7 +79,7 @@ async def prbs9_demod(dut):
     valid_start = result_valid.index(1)
     assert all(result_valid[valid_start:])
     signal_start = valid_start + result[valid_start:].index(0)
-    for i, bit in enumerate(test_data[100:]):
+    for i, bit in enumerate(test_data[100:-10]):
         assert result[signal_start + round((i + 0.5) * samples_per_bit)] == bit
 
 
@@ -97,7 +97,6 @@ async def random_validity(dut):
         await RisingEdge(dut.clk)
         result.append(int(dut.out))
         result_valid.append(int(dut.valid))
-
 
 
 def test_wave_gen():

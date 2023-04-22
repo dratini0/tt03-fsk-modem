@@ -54,6 +54,59 @@ module dratini0_fsk_modem_top(io_out, io_in);
   assign rx_clk = io_in[0];
 endmodule
 
+module glitch_filter(rst, in_, out, clk);
+  reg \$auto$verilog_backend.cc:2083:dump_module$1  = 0;
+  wire \$1 ;
+  wire \$10 ;
+  wire \$3 ;
+  wire [2:0] \$5 ;
+  wire [2:0] \$6 ;
+  wire \$8 ;
+  reg [1:0] _count = 2'h0;
+  reg [1:0] \_count$next ;
+  input clk;
+  wire clk;
+  input in_;
+  wire in_;
+  output out;
+  reg out = 1'h0;
+  reg \out$next ;
+  input rst;
+  wire rst;
+  assign \$10  = _count == 2'h3;
+  always @(posedge clk)
+    _count <= \_count$next ;
+  always @(posedge clk)
+    out <= \out$next ;
+  assign \$1  = in_ == out;
+  assign \$3  = _count == 2'h3;
+  assign \$6  = _count + 1'h1;
+  assign \$8  = in_ == out;
+  always @* begin
+    if (\$auto$verilog_backend.cc:2083:dump_module$1 ) begin end
+    (* full_case = 32'd1 *)
+    casez ({ \$3 , \$1  })
+      2'b?1:
+          \_count$next  = 2'h0;
+      2'b1?:
+          \_count$next  = 2'h0;
+      default:
+          \_count$next  = \$6 [1:0];
+    endcase
+  end
+  always @* begin
+    if (\$auto$verilog_backend.cc:2083:dump_module$1 ) begin end
+    \out$next  = out;
+    casez ({ \$10 , \$8  })
+      2'b?1:
+          /* empty */;
+      2'b1?:
+          \out$next  = in_;
+    endcase
+  end
+  assign \$5  = \$6 ;
+endmodule
+
 module i_filter(rst, in_, out, clk);
   wire [31:0] \$1 ;
   wire [3:0] \$10 ;
@@ -195,32 +248,6 @@ module i_filter(rst, in_, out, clk);
 endmodule
 
 module lut(out, in_);
-  reg \$auto$verilog_backend.cc:2083:dump_module$1  = 0;
-  wire \$1 ;
-  wire [9:0] \$3 ;
-  wire [9:0] \$5 ;
-  wire [9:0] \$6 ;
-  input [9:0] in_;
-  wire [9:0] in_;
-  output [9:0] out;
-  reg [9:0] out;
-  assign \$1  = ~ in_[9];
-  assign \$5  = ~ \$6 ;
-  always @* begin
-    if (\$auto$verilog_backend.cc:2083:dump_module$1 ) begin end
-    (* full_case = 32'd1 *)
-    casez (\$1 )
-      1'h1:
-          out = \$3 ;
-      default:
-          out = \$5 ;
-    endcase
-  end
-  assign \$3  = { in_[8:0], 1'h0 };
-  assign \$6  = { in_[8:0], 1'h0 };
-endmodule
-
-module \lut$1 (out, in_);
   reg \$auto$verilog_backend.cc:2083:dump_module$2  = 0;
   wire \$1 ;
   wire [9:0] \$3 ;
@@ -246,8 +273,34 @@ module \lut$1 (out, in_);
   assign \$6  = { in_[8:0], 1'h0 };
 endmodule
 
-module mixer(rst, in_, frequency, i, q, clk);
+module \lut$1 (out, in_);
   reg \$auto$verilog_backend.cc:2083:dump_module$3  = 0;
+  wire \$1 ;
+  wire [9:0] \$3 ;
+  wire [9:0] \$5 ;
+  wire [9:0] \$6 ;
+  input [9:0] in_;
+  wire [9:0] in_;
+  output [9:0] out;
+  reg [9:0] out;
+  assign \$1  = ~ in_[9];
+  assign \$5  = ~ \$6 ;
+  always @* begin
+    if (\$auto$verilog_backend.cc:2083:dump_module$3 ) begin end
+    (* full_case = 32'd1 *)
+    casez (\$1 )
+      1'h1:
+          out = \$3 ;
+      default:
+          out = \$5 ;
+    endcase
+  end
+  assign \$3  = { in_[8:0], 1'h0 };
+  assign \$6  = { in_[8:0], 1'h0 };
+endmodule
+
+module mixer(rst, in_, frequency, i, q, clk);
+  reg \$auto$verilog_backend.cc:2083:dump_module$4  = 0;
   wire [10:0] \$1 ;
   wire \$10 ;
   wire [10:0] \$2 ;
@@ -276,7 +329,7 @@ module mixer(rst, in_, frequency, i, q, clk);
   assign \$6  = ~ $signed(in_);
   assign \$8  = ~ $signed(in_);
   always @* begin
-    if (\$auto$verilog_backend.cc:2083:dump_module$3 ) begin end
+    if (\$auto$verilog_backend.cc:2083:dump_module$4 ) begin end
     (* full_case = 32'd1 *)
     casez (_phase[9:8])
       2'h0:
@@ -290,7 +343,7 @@ module mixer(rst, in_, frequency, i, q, clk);
     endcase
   end
   always @* begin
-    if (\$auto$verilog_backend.cc:2083:dump_module$3 ) begin end
+    if (\$auto$verilog_backend.cc:2083:dump_module$4 ) begin end
     (* full_case = 32'd1 *)
     casez (_phase[9:8])
       2'h0:
@@ -308,7 +361,7 @@ module mixer(rst, in_, frequency, i, q, clk);
 endmodule
 
 module phase_detector(q, phase, i);
-  reg \$auto$verilog_backend.cc:2083:dump_module$4  = 0;
+  reg \$auto$verilog_backend.cc:2083:dump_module$5  = 0;
   wire [9:0] \$1 ;
   wire \$10 ;
   wire \$13 ;
@@ -334,7 +387,7 @@ module phase_detector(q, phase, i);
   assign \$3  = \$4  ? i : \$1 ;
   assign \$7  = ~ $signed(q);
   always @* begin
-    if (\$auto$verilog_backend.cc:2083:dump_module$4 ) begin end
+    if (\$auto$verilog_backend.cc:2083:dump_module$5 ) begin end
     (* full_case = 32'd1 *)
     casez ({ \$17 , \$15 , \$13  })
       3'h7:
@@ -358,7 +411,7 @@ module phase_detector(q, phase, i);
 endmodule
 
 module phase_differentiator(rst, phase, out, valid, clk);
-  reg \$auto$verilog_backend.cc:2083:dump_module$5  = 0;
+  reg \$auto$verilog_backend.cc:2083:dump_module$6  = 0;
   wire \$1 ;
   wire \$10 ;
   wire [10:0] \$12 ;
@@ -395,7 +448,7 @@ module phase_differentiator(rst, phase, out, valid, clk);
   assign \$4  = phase - _last_phase;
   assign \$7  = phase - _last_phase;
   always @* begin
-    if (\$auto$verilog_backend.cc:2083:dump_module$5 ) begin end
+    if (\$auto$verilog_backend.cc:2083:dump_module$6 ) begin end
     (* full_case = 32'd1 *)
     casez (\$3 [2:0])
       3'h0:
@@ -409,7 +462,7 @@ module phase_differentiator(rst, phase, out, valid, clk);
     endcase
   end
   always @* begin
-    if (\$auto$verilog_backend.cc:2083:dump_module$5 ) begin end
+    if (\$auto$verilog_backend.cc:2083:dump_module$6 ) begin end
     \out$next  = out;
     casez (\$6 [2:0])
       3'h0:
@@ -421,7 +474,7 @@ module phase_differentiator(rst, phase, out, valid, clk);
     endcase
   end
   always @* begin
-    if (\$auto$verilog_backend.cc:2083:dump_module$5 ) begin end
+    if (\$auto$verilog_backend.cc:2083:dump_module$6 ) begin end
     (* full_case = 32'd1 *)
     casez (_valid_counter_reset)
       1'h1:
@@ -587,6 +640,8 @@ module rx(rst, frequency, frequency_invert, in_, out, valid, clk);
   wire [9:0] frequency;
   input frequency_invert;
   wire frequency_invert;
+  wire glitch_filter_in_;
+  wire glitch_filter_out;
   wire i_filter_in_;
   wire [8:0] i_filter_out;
   input in_;
@@ -611,7 +666,13 @@ module rx(rst, frequency, frequency_invert, in_, out, valid, clk);
   wire valid;
   assign \$1  = i_filter_out - 8'hfc;
   assign \$3  = q_filter_out - 8'hfc;
-  assign \$5  = phase_differentiator_out ^ frequency_invert;
+  assign \$5  = glitch_filter_out ^ frequency_invert;
+  glitch_filter glitch_filter (
+    .clk(clk),
+    .in_(glitch_filter_in_),
+    .out(glitch_filter_out),
+    .rst(rst)
+  );
   i_filter i_filter (
     .clk(clk),
     .in_(i_filter_in_),
@@ -646,6 +707,7 @@ module rx(rst, frequency, frequency_invert, in_, out, valid, clk);
   );
   assign valid = phase_differentiator_valid;
   assign out = \$5 ;
+  assign glitch_filter_in_ = phase_differentiator_out;
   assign phase_differentiator_phase = phase_detector_phase;
   assign phase_detector_q = \$3 ;
   assign phase_detector_i = \$1 ;

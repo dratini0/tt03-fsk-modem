@@ -54,6 +54,7 @@ class RxFilter(Elaboratable):
     def get_gain(self):
         return int(np.sum(self._filter))
 
+
 class IQMixer(Elaboratable):
     def __init__(self, width):
         self.in_ = Signal(signed(width))
@@ -175,6 +176,33 @@ class PhaseDifferentiator(Elaboratable):
         return [self.phase, self.out, self.valid]
 
 
+class GlitchFilter(Elaboratable):
+    def __init__(self, threshold=3):
+        self.in_ = Signal()
+        self.out = Signal(reset_less=True)
+
+        self._threshold = threshold
+        self._count = Signal(range(threshold + 1), reset_less=True)
+
+    def elaborate(self, platform):
+        m = Module()
+
+        with m.If(self.in_ == self.out):
+            m.d.sync += self._count.eq(0)
+        with m.Elif(self._count == self._threshold):
+            m.d.sync += [
+                self._count.eq(0),
+                self.out.eq(self.in_),
+            ]
+        with m.Else():
+            m.d.sync += self._count.eq(self._count + 1)
+
+        return m
+
+    def get_ports(self):
+        return [self.in_, self.out]
+
+
 class Rx(Elaboratable):
     def __init__(self):
         self.in_ = Signal(1)
@@ -189,6 +217,7 @@ class Rx(Elaboratable):
         self._q_filter = RxFilter()
         self._phase_detector = PhaseDetector(10)
         self._phase_differentiator = PhaseDifferentiator()
+        self._glitch_filter = GlitchFilter(3)
 
     def elaborate(self, platform):
         m = Module()
@@ -198,16 +227,22 @@ class Rx(Elaboratable):
         m.submodules.q_filter = self._q_filter
         m.submodules.phase_detector = self._phase_detector
         m.submodules.phase_differentiator = self._phase_differentiator
+        m.submodules.glitch_filter = self._glitch_filter
 
         m.d.comb += [
             self._mixer.in_.eq(self.in_),
             self._mixer.frequency.eq(self.frequency),
             self._i_filter.in_.eq(self._mixer.i),
             self._q_filter.in_.eq(self._mixer.q),
-            self._phase_detector.i.eq(self._i_filter.out - self._i_filter.get_gain() // 2),
-            self._phase_detector.q.eq(self._q_filter.out - self._q_filter.get_gain() // 2),
+            self._phase_detector.i.eq(
+                self._i_filter.out - self._i_filter.get_gain() // 2
+            ),
+            self._phase_detector.q.eq(
+                self._q_filter.out - self._q_filter.get_gain() // 2
+            ),
             self._phase_differentiator.phase.eq(self._phase_detector.phase),
-            self.out.eq(self._phase_differentiator.out ^ self.frequency_invert),
+            self._glitch_filter.in_.eq(self._phase_differentiator.out),
+            self.out.eq(self._glitch_filter.out ^ self.frequency_invert),
             self.valid.eq(self._phase_differentiator.valid),
         ]
 
