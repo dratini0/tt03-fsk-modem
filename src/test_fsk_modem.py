@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import itertools
-from random import randint
+import wave
 
 from amaranth import *
 
@@ -51,6 +51,20 @@ F = [F_C + 100.0, F_C - 100.0]
 BAUD = 300.0
 
 
+async def write_wave_file(dut, name):
+    if not dut.samples_out.value.is_resolvable:
+        print(dut.samples_out.value)
+        assert False
+        return
+    with wave.open(name, "wb") as wav:
+        wav.setnchannels(1)
+        wav.setsampwidth(1)
+        wav.setframerate(F_S)
+        while True:
+            await RisingEdge(dut.clk)
+            wav.writeframes(bytes((int(dut.samples_out) << 2,)))
+
+
 @cocotb.test()
 async def modem_mode(dut):
     test_data = [1] * 100 + [0, 1] * 10 + prbs9 * 2
@@ -96,6 +110,8 @@ async def modem_mode(dut):
 
     await send_bitstream(dut, bytes_to_bitstream(program))
 
+    cocotb.start_soon(write_wave_file(dut, "test_modem_mode.wav"))
+
     for sample_rx, sample_tx in zip(waveform_rx, waveform_tx):
         dut.samples_in.value = sample_rx
         dut.data_in.value = sample_tx
@@ -117,6 +133,8 @@ async def dtmf_mode(dut):
 
     # mute
     await send_bitstream(dut, bytes_to_bitstream([0x90]))
+
+    cocotb.start_soon(write_wave_file(dut, "test_dtmf_mode.wav"))
 
     await Timer(50, "ms")
 
@@ -148,6 +166,7 @@ def test_fsk_modem():
         simulator=Icarus,
         vcd_file="test_fsk_modem.vcd",
     )
+
 
 def test_gatelevel():
     cocotb_run(
