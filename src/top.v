@@ -39,15 +39,42 @@ module dratini0_fsk_modem_top(io_out, io_in);
   assign fsk_modem_clk = io_in[0];
 endmodule
 
+module \edge (rst, in_, out, clk);
+  wire \$1 ;
+  wire \$3 ;
+  input clk;
+  wire clk;
+  input in_;
+  wire in_;
+  reg last_in = 1'h0;
+  wire \last_in$next ;
+  output out;
+  wire out;
+  input rst;
+  wire rst;
+  assign \$1  = ~ last_in;
+  assign \$3  = in_ & \$1 ;
+  always @(posedge clk)
+    last_in <= \last_in$next ;
+  assign out = \$3 ;
+  assign \last_in$next  = in_;
+endmodule
+
 module fsk_modem(rst, cs_n, sck, mosi, data_in, samples_in, data_out, valid_out, samples_out, clk);
   wire [7:0] \$1 ;
   wire \$11 ;
   wire \$13 ;
   wire \$15 ;
+  wire \$17 ;
+  wire \$19 ;
+  wire [9:0] \$21 ;
+  wire [3:0] \$23 ;
+  wire \$25 ;
   wire [9:0] \$3 ;
   wire [7:0] \$4 ;
   wire [9:0] \$7 ;
   wire [9:0] \$9 ;
+  wire _validity_enforced;
   input clk;
   wire clk;
   input cs_n;
@@ -59,14 +86,26 @@ module fsk_modem(rst, cs_n, sck, mosi, data_in, samples_in, data_out, valid_out,
   input mosi;
   wire mosi;
   wire [7:0] registers_data_in;
+  wire registers_enable_retimer;
   wire registers_enforce_validity;
   wire registers_frequency_invert;
   wire [7:0] registers_mixer_freq;
+  wire [7:0] registers_retimer_freq;
+  wire [1:0] registers_retimer_width;
   wire [7:0] registers_we;
   wire [7:0] registers_wg1_freq_mark;
   wire [7:0] registers_wg1_freq_space;
   wire [7:0] registers_wg2_freq;
   wire [1:0] registers_wg_mux_cfg;
+  wire [7:0] retimer_rx_data;
+  wire [9:0] retimer_rx_frequency;
+  wire retimer_rx_in_;
+  wire retimer_rx_we;
+  wire [3:0] retimer_rx_width;
+  wire [7:0] retimer_tx_data;
+  wire [9:0] retimer_tx_frequency;
+  wire retimer_tx_out;
+  wire retimer_tx_we;
   input rst;
   wire rst;
   wire [9:0] rx_frequency;
@@ -99,22 +138,47 @@ module fsk_modem(rst, cs_n, sck, mosi, data_in, samples_in, data_out, valid_out,
   assign \$11  = ~ rx_valid;
   assign \$13  = registers_enforce_validity & \$11 ;
   assign \$15  = rx_out | \$13 ;
+  assign \$17  = ~ registers_enable_retimer;
   assign \$1  = + spi_we;
+  assign \$19  = _validity_enforced | \$17 ;
+  assign \$21  = + registers_retimer_freq;
+  assign \$23  = registers_retimer_width + 3'h5;
+  assign \$25  = registers_enable_retimer ? retimer_tx_out : _validity_enforced;
   assign \$4  = data_in ? registers_wg1_freq_mark : registers_wg1_freq_space;
   assign \$3  = + \$4 ;
   assign \$7  = + registers_wg2_freq;
   registers registers (
     .clk(clk),
     .data_in(registers_data_in),
+    .enable_retimer(registers_enable_retimer),
     .enforce_validity(registers_enforce_validity),
     .frequency_invert(registers_frequency_invert),
     .mixer_freq(registers_mixer_freq),
+    .retimer_freq(registers_retimer_freq),
+    .retimer_width(registers_retimer_width),
     .rst(rst),
     .we(registers_we),
     .wg1_freq_mark(registers_wg1_freq_mark),
     .wg1_freq_space(registers_wg1_freq_space),
     .wg2_freq(registers_wg2_freq),
     .wg_mux_cfg(registers_wg_mux_cfg)
+  );
+  retimer_rx retimer_rx (
+    .clk(clk),
+    .data(retimer_rx_data),
+    .frequency(retimer_rx_frequency),
+    .in_(retimer_rx_in_),
+    .rst(rst),
+    .we(retimer_rx_we),
+    .width(retimer_rx_width)
+  );
+  retimer_tx retimer_tx (
+    .clk(clk),
+    .data(retimer_tx_data),
+    .frequency(10'h062),
+    .out(retimer_tx_out),
+    .rst(rst),
+    .we(retimer_tx_we)
   );
   rx rx (
     .clk(clk),
@@ -153,7 +217,14 @@ module fsk_modem(rst, cs_n, sck, mosi, data_in, samples_in, data_out, valid_out,
     .out(wgmux_out)
   );
   assign valid_out = rx_valid;
-  assign data_out = \$15 ;
+  assign data_out = \$25 ;
+  assign retimer_tx_frequency = 10'h062;
+  assign retimer_tx_we = retimer_rx_we;
+  assign retimer_tx_data = retimer_rx_data;
+  assign retimer_rx_width = \$23 ;
+  assign retimer_rx_frequency = \$21 ;
+  assign retimer_rx_in_ = \$19 ;
+  assign _validity_enforced = \$15 ;
   assign rx_frequency_invert = registers_frequency_invert;
   assign rx_frequency = \$9 ;
   assign rx_in_ = samples_in;
@@ -746,11 +817,14 @@ module q_filter(rst, in_, out, clk);
   assign \$118  = { 1'h0, _x[29] };
 endmodule
 
-module registers(rst, data_in, we, wg1_freq_mark, wg1_freq_space, wg2_freq, wg_mux_cfg, mixer_freq, frequency_invert, enforce_validity, clk);
+module registers(rst, data_in, we, wg1_freq_mark, wg1_freq_space, wg2_freq, wg_mux_cfg, mixer_freq, frequency_invert, enforce_validity, enable_retimer, retimer_freq, retimer_width, clk);
   reg \$auto$verilog_backend.cc:2083:dump_module$7  = 0;
   wire \$1 ;
   wire \$11 ;
   wire \$13 ;
+  wire \$15 ;
+  wire \$17 ;
+  wire \$19 ;
   wire \$3 ;
   wire \$5 ;
   wire \$7 ;
@@ -759,8 +833,11 @@ module registers(rst, data_in, we, wg1_freq_mark, wg1_freq_space, wg2_freq, wg_m
   wire clk;
   input [7:0] data_in;
   wire [7:0] data_in;
+  output enable_retimer;
+  reg enable_retimer = 1'h0;
+  reg \enable_retimer$next ;
   output enforce_validity;
-  reg enforce_validity = 1'h1;
+  reg enforce_validity = 1'h0;
   reg \enforce_validity$next ;
   output frequency_invert;
   reg frequency_invert = 1'h0;
@@ -768,6 +845,12 @@ module registers(rst, data_in, we, wg1_freq_mark, wg1_freq_space, wg2_freq, wg_m
   output [7:0] mixer_freq;
   reg [7:0] mixer_freq = 8'h00;
   reg [7:0] \mixer_freq$next ;
+  output [7:0] retimer_freq;
+  reg [7:0] retimer_freq = 8'h00;
+  reg [7:0] \retimer_freq$next ;
+  output [1:0] retimer_width;
+  reg [1:0] retimer_width = 2'h0;
+  reg [1:0] \retimer_width$next ;
   input rst;
   wire rst;
   input [7:0] we;
@@ -787,6 +870,10 @@ module registers(rst, data_in, we, wg1_freq_mark, wg1_freq_space, wg2_freq, wg_m
   assign \$9  = | we;
   assign \$11  = | we;
   assign \$13  = | we;
+  assign \$15  = | we;
+  assign \$17  = | we;
+  assign \$1  = | we;
+  assign \$19  = | we;
   always @(posedge clk)
     wg1_freq_space <= \wg1_freq_space$next ;
   always @(posedge clk)
@@ -797,11 +884,16 @@ module registers(rst, data_in, we, wg1_freq_mark, wg1_freq_space, wg2_freq, wg_m
     wg_mux_cfg <= \wg_mux_cfg$next ;
   always @(posedge clk)
     mixer_freq <= \mixer_freq$next ;
-  assign \$1  = | we;
   always @(posedge clk)
     frequency_invert <= \frequency_invert$next ;
   always @(posedge clk)
     enforce_validity <= \enforce_validity$next ;
+  always @(posedge clk)
+    retimer_freq <= \retimer_freq$next ;
+  always @(posedge clk)
+    retimer_width <= \retimer_width$next ;
+  always @(posedge clk)
+    enable_retimer <= \enable_retimer$next ;
   assign \$3  = | we;
   assign \$5  = | we;
   assign \$7  = | we;
@@ -963,11 +1055,471 @@ module registers(rst, data_in, we, wg1_freq_mark, wg1_freq_space, wg2_freq, wg_m
                 \enforce_validity$next  = data_in[1];
           endcase
     endcase
-    casez (rst)
+  end
+  always @* begin
+    if (\$auto$verilog_backend.cc:2083:dump_module$7 ) begin end
+    \retimer_freq$next  = retimer_freq;
+    casez (\$15 )
       1'h1:
-          \enforce_validity$next  = 1'h1;
+          casez (data_in[7:4])
+            4'h0:
+                /* empty */;
+            4'h1:
+                /* empty */;
+            4'h2:
+                /* empty */;
+            4'h3:
+                /* empty */;
+            4'h4:
+                /* empty */;
+            4'h5:
+                /* empty */;
+            4'h6:
+                /* empty */;
+            4'h7:
+                /* empty */;
+            4'h8:
+                /* empty */;
+            4'h9:
+                /* empty */;
+            4'ha:
+                \retimer_freq$next [3:0] = data_in[3:0];
+            4'hb:
+                \retimer_freq$next [7:4] = data_in[3:0];
+          endcase
     endcase
   end
+  always @* begin
+    if (\$auto$verilog_backend.cc:2083:dump_module$7 ) begin end
+    \retimer_width$next  = retimer_width;
+    casez (\$17 )
+      1'h1:
+          casez (data_in[7:4])
+            4'h0:
+                /* empty */;
+            4'h1:
+                /* empty */;
+            4'h2:
+                /* empty */;
+            4'h3:
+                /* empty */;
+            4'h4:
+                /* empty */;
+            4'h5:
+                /* empty */;
+            4'h6:
+                /* empty */;
+            4'h7:
+                /* empty */;
+            4'h8:
+                /* empty */;
+            4'h9:
+                /* empty */;
+            4'ha:
+                /* empty */;
+            4'hb:
+                /* empty */;
+            4'hc:
+                \retimer_width$next  = data_in[1:0];
+          endcase
+    endcase
+  end
+  always @* begin
+    if (\$auto$verilog_backend.cc:2083:dump_module$7 ) begin end
+    \enable_retimer$next  = enable_retimer;
+    casez (\$19 )
+      1'h1:
+          casez (data_in[7:4])
+            4'h0:
+                /* empty */;
+            4'h1:
+                /* empty */;
+            4'h2:
+                /* empty */;
+            4'h3:
+                /* empty */;
+            4'h4:
+                /* empty */;
+            4'h5:
+                /* empty */;
+            4'h6:
+                /* empty */;
+            4'h7:
+                /* empty */;
+            4'h8:
+                /* empty */;
+            4'h9:
+                /* empty */;
+            4'ha:
+                /* empty */;
+            4'hb:
+                /* empty */;
+            4'hc:
+                \enable_retimer$next  = data_in[3];
+          endcase
+    endcase
+    casez (rst)
+      1'h1:
+          \enable_retimer$next  = 1'h0;
+    endcase
+  end
+endmodule
+
+module retimer_rx(rst, in_, frequency, width, data, we, clk);
+  reg \$auto$verilog_backend.cc:2083:dump_module$8  = 0;
+  wire \$1 ;
+  wire \$11 ;
+  wire [11:0] \$13 ;
+  wire [10:0] \$14 ;
+  wire [11:0] \$16 ;
+  wire [9:0] \$18 ;
+  wire [1:0] \$19 ;
+  wire [9:0] \$21 ;
+  wire [3:0] \$23 ;
+  wire \$25 ;
+  wire \$27 ;
+  wire [3:0] \$29 ;
+  wire [10:0] \$3 ;
+  wire [3:0] \$30 ;
+  wire \$32 ;
+  wire \$34 ;
+  wire [3:0] \$36 ;
+  wire \$38 ;
+  wire [10:0] \$4 ;
+  wire [10:0] \$6 ;
+  wire [10:0] \$7 ;
+  wire [3:0] \$9 ;
+  reg [2:0] _bit_index = 3'h0;
+  reg [2:0] \_bit_index$next ;
+  reg [9:0] _clock = 10'h000;
+  reg [9:0] \_clock$next ;
+  wire _clock_overflow;
+  (* enum_base_type = "UARTState" *)
+  (* enum_value_00 = "READY" *)
+  (* enum_value_01 = "START" *)
+  (* enum_value_10 = "DATA" *)
+  (* enum_value_11 = "STOP" *)
+  reg [1:0] _state = 2'h0;
+  reg [1:0] \_state$next ;
+  reg [8:0] _vote = 9'h000;
+  reg [8:0] \_vote$next ;
+  input clk;
+  wire clk;
+  output [7:0] data;
+  reg [7:0] data = 8'h00;
+  reg [7:0] \data$next ;
+  wire edge_in_;
+  wire edge_out;
+  input [9:0] frequency;
+  wire [9:0] frequency;
+  input in_;
+  wire in_;
+  input rst;
+  wire rst;
+  output we;
+  reg we = 1'h0;
+  reg \we$next ;
+  input [3:0] width;
+  wire [3:0] width;
+  assign \$9  = _bit_index + 1'h1;
+  assign \$11  = \$9  == width;
+  assign \$14  = _clock + frequency;
+  assign \$16  = \$14  + 9'h100;
+  assign \$1  = ~ in_;
+  assign \$19  = in_ ? 2'h1 : 2'h3;
+  assign \$21  = $signed(_vote) + $signed(\$19 );
+  assign \$23  = _bit_index + 1'h1;
+  assign \$25  = \$23  == width;
+  assign \$27  = $signed(_vote) >= $signed(9'h000);
+  assign \$30  = _bit_index + 1'h1;
+  assign \$32  = $signed(_vote) < $signed(9'h000);
+  assign \$34  = $signed(_vote) < $signed(9'h000);
+  assign \$36  = _bit_index + 1'h1;
+  assign \$38  = \$36  == width;
+  always @(posedge clk)
+    _clock <= \_clock$next ;
+  always @(posedge clk)
+    _vote <= \_vote$next ;
+  always @(posedge clk)
+    we <= \we$next ;
+  always @(posedge clk)
+    data <= \data$next ;
+  always @(posedge clk)
+    _bit_index <= \_bit_index$next ;
+  always @(posedge clk)
+    _state <= \_state$next ;
+  assign \$4  = _clock + frequency;
+  assign \$7  = _clock + frequency;
+  \edge  \edge  (
+    .clk(clk),
+    .in_(edge_in_),
+    .out(edge_out),
+    .rst(rst)
+  );
+  always @* begin
+    if (\$auto$verilog_backend.cc:2083:dump_module$8 ) begin end
+    \_clock$next  = \$7 [9:0];
+    casez (_state)
+      2'h0:
+          casez (edge_out)
+            1'h1:
+                \_clock$next  = 10'h000;
+          endcase
+      2'h1:
+          /* empty */;
+      2'h2:
+          casez (_clock_overflow)
+            1'h1:
+                casez (\$11 )
+                  1'h1:
+                      \_clock$next  = \$16 [9:0];
+                endcase
+          endcase
+    endcase
+  end
+  always @* begin
+    if (\$auto$verilog_backend.cc:2083:dump_module$8 ) begin end
+    \_vote$next  = \$21 [8:0];
+    casez (_clock_overflow)
+      1'h1:
+          \_vote$next  = 9'h000;
+    endcase
+    casez (_state)
+      2'h0:
+          casez (edge_out)
+            1'h1:
+                \_vote$next  = 9'h000;
+          endcase
+    endcase
+  end
+  always @* begin
+    if (\$auto$verilog_backend.cc:2083:dump_module$8 ) begin end
+    \we$next  = 1'h0;
+    casez (_state)
+      2'h0:
+          /* empty */;
+      2'h1:
+          /* empty */;
+      2'h2:
+          casez (_clock_overflow)
+            1'h1:
+                casez (\$25 )
+                  1'h1:
+                      \we$next  = 1'h1;
+                endcase
+          endcase
+    endcase
+  end
+  always @* begin
+    if (\$auto$verilog_backend.cc:2083:dump_module$8 ) begin end
+    \data$next  = data;
+    casez (_clock_overflow)
+      1'h1:
+          \data$next  = { \$27 , data[7:1] };
+    endcase
+  end
+  always @* begin
+    if (\$auto$verilog_backend.cc:2083:dump_module$8 ) begin end
+    \_bit_index$next  = _bit_index;
+    casez (_clock_overflow)
+      1'h1:
+          \_bit_index$next  = \$30 [2:0];
+    endcase
+    casez (_state)
+      2'h0:
+          /* empty */;
+      2'h1:
+          casez (_clock_overflow)
+            1'h1:
+                casez (\$32 )
+                  1'h1:
+                      \_bit_index$next  = 3'h0;
+                endcase
+          endcase
+    endcase
+  end
+  always @* begin
+    if (\$auto$verilog_backend.cc:2083:dump_module$8 ) begin end
+    \_state$next  = _state;
+    (* full_case = 32'd1 *)
+    casez (_state)
+      2'h0:
+          casez (edge_out)
+            1'h1:
+                \_state$next  = 2'h1;
+          endcase
+      2'h1:
+          casez (_clock_overflow)
+            1'h1:
+                (* full_case = 32'd1 *)
+                casez (\$34 )
+                  1'h1:
+                      \_state$next  = 2'h2;
+                  default:
+                      \_state$next  = 2'h0;
+                endcase
+          endcase
+      2'h2:
+          casez (_clock_overflow)
+            1'h1:
+                casez (\$38 )
+                  1'h1:
+                      \_state$next  = 2'h3;
+                endcase
+          endcase
+      2'h3:
+          casez (_clock_overflow)
+            1'h1:
+                \_state$next  = 2'h0;
+          endcase
+    endcase
+    casez (rst)
+      1'h1:
+          \_state$next  = 2'h0;
+    endcase
+  end
+  assign \$3  = \$4 ;
+  assign \$6  = \$7 ;
+  assign \$13  = \$16 ;
+  assign \$18  = \$21 ;
+  assign \$29  = \$30 ;
+  assign _clock_overflow = \$4 [10];
+  assign edge_in_ = \$1 ;
+endmodule
+
+module retimer_tx(rst, data, we, frequency, out, clk);
+  reg \$auto$verilog_backend.cc:2083:dump_module$9  = 0;
+  wire [10:0] \$1 ;
+  wire \$10 ;
+  wire [7:0] \$12 ;
+  wire [10:0] \$2 ;
+  wire [10:0] \$4 ;
+  wire [10:0] \$5 ;
+  wire [3:0] \$7 ;
+  wire [3:0] \$8 ;
+  reg [2:0] _bit_index = 3'h0;
+  reg [2:0] \_bit_index$next ;
+  reg [9:0] _clock = 10'h000;
+  reg [9:0] \_clock$next ;
+  wire _clock_overflow;
+  reg [7:0] _data = 8'h00;
+  reg [7:0] \_data$next ;
+  (* enum_base_type = "UARTState" *)
+  (* enum_value_00 = "READY" *)
+  (* enum_value_01 = "START" *)
+  (* enum_value_10 = "DATA" *)
+  (* enum_value_11 = "STOP" *)
+  reg [1:0] _state = 2'h0;
+  reg [1:0] \_state$next ;
+  input clk;
+  wire clk;
+  input [7:0] data;
+  wire [7:0] data;
+  input [9:0] frequency;
+  wire [9:0] frequency;
+  output out;
+  reg out;
+  input rst;
+  wire rst;
+  input we;
+  wire we;
+  assign \$10  = ! _bit_index;
+  assign \$12  = + _data[7:1];
+  always @(posedge clk)
+    _clock <= \_clock$next ;
+  always @(posedge clk)
+    _bit_index <= \_bit_index$next ;
+  always @(posedge clk)
+    _state <= \_state$next ;
+  always @(posedge clk)
+    _data <= \_data$next ;
+  assign \$2  = _clock + frequency;
+  assign \$5  = _clock + frequency;
+  assign \$8  = _bit_index + 1'h1;
+  always @* begin
+    if (\$auto$verilog_backend.cc:2083:dump_module$9 ) begin end
+    \_clock$next  = \$5 [9:0];
+    casez (we)
+      1'h1:
+          \_clock$next  = 10'h000;
+    endcase
+  end
+  always @* begin
+    if (\$auto$verilog_backend.cc:2083:dump_module$9 ) begin end
+    \_bit_index$next  = _bit_index;
+    casez (_clock_overflow)
+      1'h1:
+          \_bit_index$next  = \$8 [2:0];
+    endcase
+    casez (we)
+      1'h1:
+          \_bit_index$next  = 3'h0;
+    endcase
+  end
+  always @* begin
+    if (\$auto$verilog_backend.cc:2083:dump_module$9 ) begin end
+    out = 1'h0;
+    casez (_state)
+      2'h0:
+          out = 1'h1;
+      2'h1:
+          out = 1'h0;
+      2'h2:
+          out = _data[0];
+    endcase
+  end
+  always @* begin
+    if (\$auto$verilog_backend.cc:2083:dump_module$9 ) begin end
+    \_state$next  = _state;
+    casez (_state)
+      2'h0:
+          /* empty */;
+      2'h1:
+          casez (_clock_overflow)
+            1'h1:
+                \_state$next  = 2'h2;
+          endcase
+      2'h2:
+          casez (_clock_overflow)
+            1'h1:
+                casez (\$10 )
+                  1'h1:
+                      \_state$next  = 2'h0;
+                endcase
+          endcase
+    endcase
+    casez (we)
+      1'h1:
+          \_state$next  = 2'h1;
+    endcase
+    casez (rst)
+      1'h1:
+          \_state$next  = 2'h0;
+    endcase
+  end
+  always @* begin
+    if (\$auto$verilog_backend.cc:2083:dump_module$9 ) begin end
+    \_data$next  = _data;
+    casez (_state)
+      2'h0:
+          /* empty */;
+      2'h1:
+          /* empty */;
+      2'h2:
+          casez (_clock_overflow)
+            1'h1:
+                \_data$next  = \$12 ;
+          endcase
+    endcase
+    casez (we)
+      1'h1:
+          \_data$next  = data;
+    endcase
+  end
+  assign \$1  = \$2 ;
+  assign \$4  = \$5 ;
+  assign \$7  = \$8 ;
+  assign _clock_overflow = \$2 [10];
 endmodule
 
 module rx(rst, in_, frequency, frequency_invert, out, valid, clk);
@@ -1079,7 +1631,7 @@ module sck_edge(rst, in_, out, clk);
 endmodule
 
 module spi(rst, cs_n, sck, mosi, data, we, clk);
-  reg \$auto$verilog_backend.cc:2083:dump_module$8  = 0;
+  reg \$auto$verilog_backend.cc:2083:dump_module$10  = 0;
   wire \$1 ;
   wire \$12 ;
   wire \$14 ;
@@ -1138,7 +1690,7 @@ module spi(rst, cs_n, sck, mosi, data, we, clk);
     .rst(rst)
   );
   always @* begin
-    if (\$auto$verilog_backend.cc:2083:dump_module$8 ) begin end
+    if (\$auto$verilog_backend.cc:2083:dump_module$10 ) begin end
     \_bit_index$next  = _bit_index;
     casez (\$3 )
       1'h1:
@@ -1150,7 +1702,7 @@ module spi(rst, cs_n, sck, mosi, data, we, clk);
     endcase
   end
   always @* begin
-    if (\$auto$verilog_backend.cc:2083:dump_module$8 ) begin end
+    if (\$auto$verilog_backend.cc:2083:dump_module$10 ) begin end
     \data$next  = data;
     casez (\$14 )
       1'h1:
@@ -1221,7 +1773,7 @@ module wg2(rst, frequency, out, clk);
 endmodule
 
 module wgmux(in2, cfg, out, in1);
-  reg \$auto$verilog_backend.cc:2083:dump_module$9  = 0;
+  reg \$auto$verilog_backend.cc:2083:dump_module$11  = 0;
   wire [6:0] \$1 ;
   wire [6:0] \$2 ;
   wire [6:0] \$4 ;
@@ -1235,7 +1787,7 @@ module wgmux(in2, cfg, out, in1);
   reg [5:0] out;
   assign \$2  = in1 + in2;
   always @* begin
-    if (\$auto$verilog_backend.cc:2083:dump_module$9 ) begin end
+    if (\$auto$verilog_backend.cc:2083:dump_module$11 ) begin end
     out = 6'h00;
     casez (cfg)
       2'h0:

@@ -6,6 +6,7 @@ from amaranth.back import verilog
 from rx import Rx
 from wave_gen import WaveGen
 from spi import SPI
+from uart import FancyUARTRx, UARTTx
 
 
 class Registers(Elaboratable):
@@ -20,7 +21,10 @@ class Registers(Elaboratable):
 
         self.mixer_freq = Signal(8, reset_less=True)
         self.frequency_invert = Signal(1, reset_less=True)
-        self.enforce_validity = Signal(1, reset=1)
+        self.enforce_validity = Signal(1, reset_less=True)
+        self.retimer_freq = Signal(8, reset_less=True)
+        self.enable_retimer = Signal(1, reset=0)
+        self.retimer_width = Signal(2, reset_less=True)
 
     def elaborate(self, platform):
         m = Module()
@@ -50,6 +54,13 @@ class Registers(Elaboratable):
                 with m.Case(9):
                     m.d.sync += self.frequency_invert.eq(data[0])
                     m.d.sync += self.enforce_validity.eq(data[1])
+                with m.Case(10):
+                    m.d.sync += self.retimer_freq[0:4].eq(data)
+                with m.Case(11):
+                    m.d.sync += self.retimer_freq[4:8].eq(data)
+                with m.Case(12):
+                    m.d.sync += self.retimer_width.eq(data[0:2])
+                    m.d.sync += self.enable_retimer.eq(data[3])
         return m
 
 
@@ -89,6 +100,9 @@ class FSKModem(Elaboratable):
         self.samples_out = Signal(6)
 
         self._rx = Rx()
+        self._validity_enforced = Signal()
+        self._retimer_rx = FancyUARTRx()
+        self._retimer_tx = UARTTx()
         self._wg1 = WaveGen()
         self._wg2 = WaveGen()
         self._wgmux = WaveGenMux(6)
@@ -98,6 +112,8 @@ class FSKModem(Elaboratable):
     def elaborate(self, platform):
         m = Module()
         m.submodules.rx = self._rx
+        m.submodules.retimer_rx = self._retimer_rx
+        m.submodules.retimer_tx = self._retimer_tx
         m.submodules.wg1 = self._wg1
         m.submodules.wg2 = self._wg2
         m.submodules.wgmux = self._wgmux
@@ -129,9 +145,16 @@ class FSKModem(Elaboratable):
             self._rx.in_.eq(self.samples_in),
             self._rx.frequency.eq(self._registers.mixer_freq),
             self._rx.frequency_invert.eq(self._registers.frequency_invert),
-            self.data_out.eq(
-                self._rx.out | (self._registers.enforce_validity & ~self._rx.valid)
+            self._validity_enforced.eq(self._rx.out | (self._registers.enforce_validity & ~self._rx.valid)),
+            self._retimer_rx.in_.eq(
+                self._validity_enforced | (~self._registers.enable_retimer)
             ),
+            self._retimer_rx.frequency.eq(self._registers.retimer_freq),
+            self._retimer_rx.width.eq(self._registers.retimer_width + 5),
+            self._retimer_tx.data.eq(self._retimer_rx.data),
+            self._retimer_tx.we.eq(self._retimer_rx.we),
+            self._retimer_tx.frequency.eq(Const(round(1200 / 12500 * 1024))),
+            self.data_out.eq(Mux(self._registers.enable_retimer, self._retimer_tx.out, self._validity_enforced)),
             self.valid_out.eq(self._rx.valid),
         ]
         return m
