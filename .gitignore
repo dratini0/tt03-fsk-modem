@@ -12,3 +12,4 @@ tt-support-tools
 OpenLane
 PDK
 gds_render*
+sim_build

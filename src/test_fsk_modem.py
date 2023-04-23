@@ -148,3 +148,23 @@ def test_fsk_modem():
         simulator=Icarus,
         vcd_file="test_fsk_modem.vcd",
     )
+
+def test_gatelevel():
+    cocotb_run(
+        "icarus",
+        toplevel="tb",
+        module=get_current_module(),
+        verilog_sources=[
+            "src/tb.v",
+            "runs/wokwi/results/final/verilog/gl/dratini0_fsk_modem_top.v",
+            "PDK/sky130A/libs.ref/sky130_fd_sc_hd/verilog/primitives.v",
+            "PDK/sky130A/libs.ref/sky130_fd_sc_hd/verilog/sky130_fd_sc_hd.v",
+        ],
+        defines=[
+            "GL_TEST",
+            "FUNCTIONAL",
+            "USE_POWER_PINS",
+            "SIM",
+            "UNIT_DELAY=#1",
+        ],
+    )
