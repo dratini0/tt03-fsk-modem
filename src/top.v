@@ -760,7 +760,7 @@ module registers(rst, data_in, we, wg1_freq_mark, wg1_freq_space, wg2_freq, wg_m
   input [7:0] data_in;
   wire [7:0] data_in;
   output enforce_validity;
-  reg enforce_validity = 1'h0;
+  reg enforce_validity = 1'h1;
   reg \enforce_validity$next ;
   output frequency_invert;
   reg frequency_invert = 1'h0;
@@ -962,6 +962,10 @@ module registers(rst, data_in, we, wg1_freq_mark, wg1_freq_space, wg2_freq, wg_m
             4'h9:
                 \enforce_validity$next  = data_in[1];
           endcase
+    endcase
+    casez (rst)
+      1'h1:
+          \enforce_validity$next  = 1'h1;
     endcase
   end
 endmodule

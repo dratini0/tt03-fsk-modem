@@ -20,7 +20,7 @@ class Registers(Elaboratable):
 
         self.mixer_freq = Signal(8, reset_less=True)
         self.frequency_invert = Signal(1, reset_less=True)
-        self.enforce_validity = Signal(1, reset_less=True)
+        self.enforce_validity = Signal(1, reset=1)
 
     def elaborate(self, platform):
         m = Module()

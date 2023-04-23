@@ -1,0 +1,49 @@
+[*]
+[*] GTKWave Analyzer v3.3.114 (w)1999-2023 BSI
+[*] Sun Apr 23 00:21:44 2023
+[*]
+[dumpfile] "/home/bala/tt03-fsk-modem/test_fsk_modem.vcd"
+[dumpfile_mtime] "Sun Apr 23 00:05:21 2023"
+[dumpfile_size] 130245836
+[savefile] "/home/bala/tt03-fsk-modem/test_fsk_modem.gtkw"
+[timestart] 4647000000000
+[size] 1920 1013
+[pos] -1 -1
+*-37.800003 3908420000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] top.
+[treeopen] top.wg1.
+[sst_width] 254
+[signals_width] 181
+[sst_expanded] 1
+[sst_vpaned_height] 321
+@28
+top.clk
+top.rst
+top.cs_n
+top.sck
+top.mosi
+top.samples_in
+top.valid_out
+top.data_out
+top.data_in
+@8024
+top.samples_out[5:0]
+@20000
+-
+-
+-
+-
+-
+-
+@22
+top.wg1_frequency[9:0]
+@28
+top.spi_we
+@22
+top.wg1._state[9:0]
+@8022
+top.wgmux.in1[5:0]
+@8023
+top.wgmux.in2[5:0]
+[pattern_trace] 1
+[pattern_trace] 0
