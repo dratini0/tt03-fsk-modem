@@ -92,9 +92,9 @@ module fsk_modem(rst, cs_n, sck, mosi, data_in, samples_in, data_out, valid_out,
   wire [13:0] wg2_frequency;
   wire [13:0] wg2_out;
   wire [1:0] wgmux_cfg;
-  wire [5:0] wgmux_in1;
-  wire [5:0] wgmux_in2;
-  wire [5:0] wgmux_out;
+  wire [9:0] wgmux_in1;
+  wire [9:0] wgmux_in2;
+  wire [9:0] wgmux_out;
   assign \$9  = + registers_mixer_freq;
   assign \$11  = ~ rx_valid;
   assign \$13  = registers_enforce_validity & \$11 ;
@@ -157,10 +157,10 @@ module fsk_modem(rst, cs_n, sck, mosi, data_in, samples_in, data_out, valid_out,
   assign rx_frequency_invert = registers_frequency_invert;
   assign rx_frequency = \$9 ;
   assign rx_in_ = samples_in;
-  assign samples_out = wgmux_out;
+  assign samples_out = wgmux_out[9:4];
   assign wgmux_cfg = registers_wg_mux_cfg;
-  assign wgmux_in2 = wg2_out[13:8];
-  assign wgmux_in1 = wg1_out[13:8];
+  assign wgmux_in2 = wg2_out[13:4];
+  assign wgmux_in1 = wg1_out[13:4];
   assign wg2_frequency = \$7 ;
   assign wg1_frequency = \$3 ;
   assign registers_we = \$1 ;
@@ -1330,34 +1330,34 @@ endmodule
 
 module wgmux(in2, cfg, out, in1);
   reg \$auto$verilog_backend.cc:2083:dump_module$9  = 0;
-  wire [6:0] \$1 ;
-  wire [6:0] \$2 ;
-  wire [6:0] \$4 ;
+  wire [10:0] \$1 ;
+  wire [10:0] \$2 ;
+  wire [10:0] \$4 ;
   input [1:0] cfg;
   wire [1:0] cfg;
-  input [5:0] in1;
-  wire [5:0] in1;
-  input [5:0] in2;
-  wire [5:0] in2;
-  output [5:0] out;
-  reg [5:0] out;
+  input [9:0] in1;
+  wire [9:0] in1;
+  input [9:0] in2;
+  wire [9:0] in2;
+  output [9:0] out;
+  reg [9:0] out;
   assign \$2  = in1 + in2;
   always @* begin
     if (\$auto$verilog_backend.cc:2083:dump_module$9 ) begin end
-    out = 6'h00;
+    out = 10'h000;
     casez (cfg)
       2'h0:
         begin
-          out[4:0] = 5'h00;
-          out[5] = 1'h1;
+          out[8:0] = 9'h000;
+          out[9] = 1'h1;
         end
       2'h1:
           out = in1;
       2'h2:
-          out = \$4 [5:0];
+          out = \$4 [9:0];
     endcase
   end
   assign \$1  = \$4 ;
-  assign \$4  = { 1'h0, \$2 [6:1] };
+  assign \$4  = { 1'h0, \$2 [10:1] };
 endmodule
 

@@ -99,7 +99,7 @@ class FSKModem(Elaboratable):
         self._rx = Rx()
         self._wg1 = WaveGen(14)
         self._wg2 = WaveGen(14)
-        self._wgmux = WaveGenMux(6)
+        self._wgmux = WaveGenMux(10)
         self._spi = SPI()
         self._registers = Registers()
 
@@ -128,10 +128,10 @@ class FSKModem(Elaboratable):
                 )
             ),
             self._wg2.frequency.eq(self._registers.wg2_freq),
-            self._wgmux.in1.eq(self._wg1.out[-6:]),
-            self._wgmux.in2.eq(self._wg2.out[-6:]),
+            self._wgmux.in1.eq(self._wg1.out[-10:]),
+            self._wgmux.in2.eq(self._wg2.out[-10:]),
             self._wgmux.cfg.eq(self._registers.wg_mux_cfg),
-            self.samples_out.eq(self._wgmux.out),
+            self.samples_out.eq(self._wgmux.out[-6:]),
         ]
         m.d.comb += [
             self._rx.in_.eq(self.samples_in),
