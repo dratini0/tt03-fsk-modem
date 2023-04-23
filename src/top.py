@@ -13,12 +13,12 @@ class Registers(Elaboratable):
         self.data_in = Signal(8)
         self.we = Signal(8)
 
-        self.wg1_freq_space = Signal(8, reset_less=True)
-        self.wg1_freq_mark = Signal(8, reset_less=True)
-        self.wg2_freq = Signal(8, reset_less=True)
+        self.wg1_freq_space = Signal(12, reset_less=True)
+        self.wg1_freq_mark = Signal(12, reset_less=True)
+        self.wg2_freq = Signal(12, reset_less=True)
         self.wg_mux_cfg = Signal(2, reset_less=True)
 
-        self.mixer_freq = Signal(8, reset_less=True)
+        self.mixer_freq = Signal(12, reset_less=True)
         self.frequency_invert = Signal(1, reset_less=True)
         self.enforce_validity = Signal(1, reset_less=True)
 
@@ -34,20 +34,28 @@ class Registers(Elaboratable):
                 with m.Case(1):
                     m.d.sync += self.wg1_freq_space[4:8].eq(data)
                 with m.Case(2):
-                    m.d.sync += self.wg1_freq_mark[0:4].eq(data)
+                    m.d.sync += self.wg1_freq_space[8:12].eq(data)
                 with m.Case(3):
-                    m.d.sync += self.wg1_freq_mark[4:8].eq(data)
+                    m.d.sync += self.wg1_freq_mark[0:4].eq(data)
                 with m.Case(4):
-                    m.d.sync += self.wg2_freq[0:4].eq(data)
+                    m.d.sync += self.wg1_freq_mark[4:8].eq(data)
                 with m.Case(5):
-                    m.d.sync += self.wg2_freq[4:8].eq(data)
+                    m.d.sync += self.wg1_freq_mark[8:12].eq(data)
                 with m.Case(6):
-                    m.d.sync += self.wg_mux_cfg.eq(data[0:2])
+                    m.d.sync += self.wg2_freq[0:4].eq(data)
                 with m.Case(7):
-                    m.d.sync += self.mixer_freq[0:4].eq(data)
+                    m.d.sync += self.wg2_freq[4:8].eq(data)
                 with m.Case(8):
-                    m.d.sync += self.mixer_freq[4:8].eq(data)
+                    m.d.sync += self.wg2_freq[8:12].eq(data)
                 with m.Case(9):
+                    m.d.sync += self.wg_mux_cfg.eq(data[0:2])
+                with m.Case(10):
+                    m.d.sync += self.mixer_freq[0:4].eq(data)
+                with m.Case(11):
+                    m.d.sync += self.mixer_freq[4:8].eq(data)
+                with m.Case(12):
+                    m.d.sync += self.mixer_freq[8:12].eq(data)
+                with m.Case(13):
                     m.d.sync += self.frequency_invert.eq(data[0])
                     m.d.sync += self.enforce_validity.eq(data[1])
         return m
@@ -89,8 +97,8 @@ class FSKModem(Elaboratable):
         self.samples_out = Signal(6)
 
         self._rx = Rx()
-        self._wg1 = WaveGen()
-        self._wg2 = WaveGen()
+        self._wg1 = WaveGen(14)
+        self._wg2 = WaveGen(14)
         self._wgmux = WaveGenMux(6)
         self._spi = SPI()
         self._registers = Registers()

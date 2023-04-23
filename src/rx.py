@@ -58,12 +58,12 @@ class RxFilter(Elaboratable):
 class IQMixer(Elaboratable):
     def __init__(self, width):
         self.in_ = Signal(signed(width))
-        self.frequency = Signal(10)
+        self.frequency = Signal(14)
 
         self.i = Signal(signed(width))
         self.q = Signal(signed(width))
 
-        self._phase = Signal(10, reset_less=True)
+        self._phase = Signal(14, reset_less=True)
 
     def elaborate(self, platform):
         m = Module()
@@ -206,7 +206,7 @@ class GlitchFilter(Elaboratable):
 class Rx(Elaboratable):
     def __init__(self):
         self.in_ = Signal(1)
-        self.frequency = Signal(10)
+        self.frequency = Signal(14)
         self.frequency_invert = Signal()
 
         self.out = Signal()

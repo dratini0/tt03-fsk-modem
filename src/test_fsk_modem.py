@@ -77,18 +77,21 @@ async def modem_mode(dut):
 
     await cocotb_header(dut)
 
-    f_c = round(F_C / F_S * 1024)
-    f_0 = round(F[0] / F_S * 1024)
-    f_1 = round(F[1] / F_S * 1024)
+    f_c = round(F_C / F_S * (1 << 14))
+    f_0 = round(F[0] / F_S * (1 << 14))
+    f_1 = round(F[1] / F_S * (1 << 14))
     program = [
         0x00 | (f_0 & 0x0F),
         0x10 | ((f_0 >> 4) & 0x0F),
-        0x20 | (f_1 & 0x0F),
-        0x30 | ((f_1 >> 4) & 0x0F),
-        0x61,
-        0x70 | (f_c & 0x0F),
-        0x80 | ((f_c >> 4) & 0x0F),
-        0x92,
+        0x20 | ((f_0 >> 8) & 0x0F),
+        0x30 | (f_1 & 0x0F),
+        0x40 | ((f_1 >> 4) & 0x0F),
+        0x50 | ((f_1 >> 8) & 0x0F),
+        0x91,
+        0xA0 | (f_c & 0x0F),
+        0xB0 | ((f_c >> 4) & 0x0F),
+        0xC0 | ((f_c >> 8) & 0x0F),
+        0xD2,
     ]
 
     await send_bitstream(dut, bytes_to_bitstream(program))
@@ -113,24 +116,26 @@ async def dtmf_mode(dut):
     await cocotb_header(dut)
 
     # mute
-    await send_bitstream(dut, bytes_to_bitstream([0x60]))
+    await send_bitstream(dut, bytes_to_bitstream([0x90]))
 
     await Timer(50, "ms")
 
     for f_row in F_R:
         for f_col in F_C:
-            f_row_reg = round(f_row / F_S * 1024)
-            f_col_reg = round(f_col / F_S * 1024)
+            f_row_reg = round(f_row / F_S * (1 << 14))
+            f_col_reg = round(f_col / F_S * (1 << 14))
             program = [
-                0x20 | (f_row_reg & 0x0F),
-                0x30 | ((f_row_reg >> 4) & 0x0F),
-                0x40 | (f_col_reg & 0x0F),
-                0x50 | ((f_col_reg >> 4) & 0x0F),
-                0x62,
+                0x30 | (f_row_reg & 0x0F),
+                0x40 | ((f_row_reg >> 4) & 0x0F),
+                0x50 | ((f_row_reg >> 8) & 0x0F),
+                0x60 | (f_col_reg & 0x0F),
+                0x70 | ((f_col_reg >> 4) & 0x0F),
+                0x80 | ((f_col_reg >> 8) & 0x0F),
+                0x92,
             ]
             await send_bitstream(dut, bytes_to_bitstream(program))
             await Timer(100, "ms")
-            await send_bitstream(dut, bytes_to_bitstream([0x60]))
+            await send_bitstream(dut, bytes_to_bitstream([0x90]))
             await Timer(50, "ms")
 
 

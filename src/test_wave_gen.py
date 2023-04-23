@@ -19,7 +19,7 @@ async def bench(dut):
     dut.frequency.value = 0
     await cocotb_header(dut)
     for frequency in [1, 2, 3] + list(range(10, 201, 10)):
-        dut.frequency.value = frequency
+        dut.frequency.value = frequency << 4
         await ClockCycles(dut.clk, 74)
         sample = []
         for _ in range(1024):
@@ -34,7 +34,7 @@ async def bench(dut):
 
 
 def test_wave_gen():
-    dut = WaveGen()
+    dut = WaveGen(14)
     run(
         dut,
         get_current_module(),

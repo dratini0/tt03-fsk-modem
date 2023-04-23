@@ -63,7 +63,7 @@ async def prbs9_demod(dut):
     waveform = waveform.tolist()
 
     dut.in_.value = 0
-    dut.frequency.value = round(F_C / F_S * 1024)
+    dut.frequency.value = round(F_C / F_S * (1 << 14))
     dut.frequency_invert.value = 0
 
     await cocotb_header(dut)
@@ -86,7 +86,7 @@ async def prbs9_demod(dut):
 @cocotb.test()
 async def random_validity(dut):
     dut.in_.value = 0
-    dut.frequency.value = round(F_C / F_S * 1024)
+    dut.frequency.value = round(F_C / F_S * (1 << 14))
     dut.frequency_invert.value = 0
 
     await cocotb_header(dut)

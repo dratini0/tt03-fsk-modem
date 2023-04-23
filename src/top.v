@@ -44,10 +44,10 @@ module fsk_modem(rst, cs_n, sck, mosi, data_in, samples_in, data_out, valid_out,
   wire \$11 ;
   wire \$13 ;
   wire \$15 ;
-  wire [9:0] \$3 ;
-  wire [7:0] \$4 ;
-  wire [9:0] \$7 ;
-  wire [9:0] \$9 ;
+  wire [13:0] \$3 ;
+  wire [11:0] \$4 ;
+  wire [13:0] \$7 ;
+  wire [13:0] \$9 ;
   input clk;
   wire clk;
   input cs_n;
@@ -61,15 +61,15 @@ module fsk_modem(rst, cs_n, sck, mosi, data_in, samples_in, data_out, valid_out,
   wire [7:0] registers_data_in;
   wire registers_enforce_validity;
   wire registers_frequency_invert;
-  wire [7:0] registers_mixer_freq;
+  wire [11:0] registers_mixer_freq;
   wire [7:0] registers_we;
-  wire [7:0] registers_wg1_freq_mark;
-  wire [7:0] registers_wg1_freq_space;
-  wire [7:0] registers_wg2_freq;
+  wire [11:0] registers_wg1_freq_mark;
+  wire [11:0] registers_wg1_freq_space;
+  wire [11:0] registers_wg2_freq;
   wire [1:0] registers_wg_mux_cfg;
   input rst;
   wire rst;
-  wire [9:0] rx_frequency;
+  wire [13:0] rx_frequency;
   wire rx_frequency_invert;
   wire rx_in_;
   wire rx_out;
@@ -87,10 +87,10 @@ module fsk_modem(rst, cs_n, sck, mosi, data_in, samples_in, data_out, valid_out,
   wire spi_we;
   output valid_out;
   wire valid_out;
-  wire [9:0] wg1_frequency;
-  wire [9:0] wg1_out;
-  wire [9:0] wg2_frequency;
-  wire [9:0] wg2_out;
+  wire [13:0] wg1_frequency;
+  wire [13:0] wg1_out;
+  wire [13:0] wg2_frequency;
+  wire [13:0] wg2_out;
   wire [1:0] wgmux_cfg;
   wire [5:0] wgmux_in1;
   wire [5:0] wgmux_in2;
@@ -159,8 +159,8 @@ module fsk_modem(rst, cs_n, sck, mosi, data_in, samples_in, data_out, valid_out,
   assign rx_in_ = samples_in;
   assign samples_out = wgmux_out;
   assign wgmux_cfg = registers_wg_mux_cfg;
-  assign wgmux_in2 = wg2_out[9:4];
-  assign wgmux_in1 = wg1_out[9:4];
+  assign wgmux_in2 = wg2_out[13:8];
+  assign wgmux_in1 = wg1_out[13:8];
   assign wg2_frequency = \$7 ;
   assign wg1_frequency = \$3 ;
   assign registers_we = \$1 ;
@@ -366,14 +366,14 @@ endmodule
 module lut(out, in_);
   reg \$auto$verilog_backend.cc:2083:dump_module$2  = 0;
   wire \$1 ;
-  wire [9:0] \$3 ;
-  wire [9:0] \$5 ;
-  wire [9:0] \$6 ;
-  input [9:0] in_;
-  wire [9:0] in_;
-  output [9:0] out;
-  reg [9:0] out;
-  assign \$1  = ~ in_[9];
+  wire [13:0] \$3 ;
+  wire [13:0] \$5 ;
+  wire [13:0] \$6 ;
+  input [13:0] in_;
+  wire [13:0] in_;
+  output [13:0] out;
+  reg [13:0] out;
+  assign \$1  = ~ in_[13];
   assign \$5  = ~ \$6 ;
   always @* begin
     if (\$auto$verilog_backend.cc:2083:dump_module$2 ) begin end
@@ -385,21 +385,21 @@ module lut(out, in_);
           out = \$5 ;
     endcase
   end
-  assign \$3  = { in_[8:0], 1'h0 };
-  assign \$6  = { in_[8:0], 1'h0 };
+  assign \$3  = { in_[12:0], 1'h0 };
+  assign \$6  = { in_[12:0], 1'h0 };
 endmodule
 
 module \lut$1 (out, in_);
   reg \$auto$verilog_backend.cc:2083:dump_module$3  = 0;
   wire \$1 ;
-  wire [9:0] \$3 ;
-  wire [9:0] \$5 ;
-  wire [9:0] \$6 ;
-  input [9:0] in_;
-  wire [9:0] in_;
-  output [9:0] out;
-  reg [9:0] out;
-  assign \$1  = ~ in_[9];
+  wire [13:0] \$3 ;
+  wire [13:0] \$5 ;
+  wire [13:0] \$6 ;
+  input [13:0] in_;
+  wire [13:0] in_;
+  output [13:0] out;
+  reg [13:0] out;
+  assign \$1  = ~ in_[13];
   assign \$5  = ~ \$6 ;
   always @* begin
     if (\$auto$verilog_backend.cc:2083:dump_module$3 ) begin end
@@ -411,24 +411,24 @@ module \lut$1 (out, in_);
           out = \$5 ;
     endcase
   end
-  assign \$3  = { in_[8:0], 1'h0 };
-  assign \$6  = { in_[8:0], 1'h0 };
+  assign \$3  = { in_[12:0], 1'h0 };
+  assign \$6  = { in_[12:0], 1'h0 };
 endmodule
 
 module mixer(rst, in_, frequency, i, q, clk);
   reg \$auto$verilog_backend.cc:2083:dump_module$4  = 0;
-  wire [10:0] \$1 ;
+  wire [14:0] \$1 ;
   wire \$10 ;
-  wire [10:0] \$2 ;
+  wire [14:0] \$2 ;
   wire \$4 ;
   wire \$6 ;
   wire \$8 ;
-  reg [9:0] _phase = 10'h000;
-  wire [9:0] \_phase$next ;
+  reg [13:0] _phase = 14'h0000;
+  wire [13:0] \_phase$next ;
   input clk;
   wire clk;
-  input [9:0] frequency;
-  wire [9:0] frequency;
+  input [13:0] frequency;
+  wire [13:0] frequency;
   output i;
   reg i;
   input in_;
@@ -447,7 +447,7 @@ module mixer(rst, in_, frequency, i, q, clk);
   always @* begin
     if (\$auto$verilog_backend.cc:2083:dump_module$4 ) begin end
     (* full_case = 32'd1 *)
-    casez (_phase[9:8])
+    casez (_phase[13:12])
       2'h0:
           i = in_;
       2'h1:
@@ -461,7 +461,7 @@ module mixer(rst, in_, frequency, i, q, clk);
   always @* begin
     if (\$auto$verilog_backend.cc:2083:dump_module$4 ) begin end
     (* full_case = 32'd1 *)
-    casez (_phase[9:8])
+    casez (_phase[13:12])
       2'h0:
           q = in_;
       2'h1:
@@ -473,7 +473,7 @@ module mixer(rst, in_, frequency, i, q, clk);
     endcase
   end
   assign \$1  = \$2 ;
-  assign \_phase$next  = \$2 [9:0];
+  assign \_phase$next  = \$2 [13:0];
 endmodule
 
 module phase_detector(q, phase, i);
@@ -765,22 +765,22 @@ module registers(rst, data_in, we, wg1_freq_mark, wg1_freq_space, wg2_freq, wg_m
   output frequency_invert;
   reg frequency_invert = 1'h0;
   reg \frequency_invert$next ;
-  output [7:0] mixer_freq;
-  reg [7:0] mixer_freq = 8'h00;
-  reg [7:0] \mixer_freq$next ;
+  output [11:0] mixer_freq;
+  reg [11:0] mixer_freq = 12'h000;
+  reg [11:0] \mixer_freq$next ;
   input rst;
   wire rst;
   input [7:0] we;
   wire [7:0] we;
-  output [7:0] wg1_freq_mark;
-  reg [7:0] wg1_freq_mark = 8'h00;
-  reg [7:0] \wg1_freq_mark$next ;
-  output [7:0] wg1_freq_space;
-  reg [7:0] wg1_freq_space = 8'h00;
-  reg [7:0] \wg1_freq_space$next ;
-  output [7:0] wg2_freq;
-  reg [7:0] wg2_freq = 8'h00;
-  reg [7:0] \wg2_freq$next ;
+  output [11:0] wg1_freq_mark;
+  reg [11:0] wg1_freq_mark = 12'h000;
+  reg [11:0] \wg1_freq_mark$next ;
+  output [11:0] wg1_freq_space;
+  reg [11:0] wg1_freq_space = 12'h000;
+  reg [11:0] \wg1_freq_space$next ;
+  output [11:0] wg2_freq;
+  reg [11:0] wg2_freq = 12'h000;
+  reg [11:0] \wg2_freq$next ;
   output [1:0] wg_mux_cfg;
   reg [1:0] wg_mux_cfg = 2'h0;
   reg [1:0] \wg_mux_cfg$next ;
@@ -815,6 +815,8 @@ module registers(rst, data_in, we, wg1_freq_mark, wg1_freq_space, wg2_freq, wg_m
                 \wg1_freq_space$next [3:0] = data_in[3:0];
             4'h1:
                 \wg1_freq_space$next [7:4] = data_in[3:0];
+            4'h2:
+                \wg1_freq_space$next [11:8] = data_in[3:0];
           endcase
     endcase
   end
@@ -829,9 +831,13 @@ module registers(rst, data_in, we, wg1_freq_mark, wg1_freq_space, wg2_freq, wg_m
             4'h1:
                 /* empty */;
             4'h2:
-                \wg1_freq_mark$next [3:0] = data_in[3:0];
+                /* empty */;
             4'h3:
+                \wg1_freq_mark$next [3:0] = data_in[3:0];
+            4'h4:
                 \wg1_freq_mark$next [7:4] = data_in[3:0];
+            4'h5:
+                \wg1_freq_mark$next [11:8] = data_in[3:0];
           endcase
     endcase
   end
@@ -850,9 +856,15 @@ module registers(rst, data_in, we, wg1_freq_mark, wg1_freq_space, wg2_freq, wg_m
             4'h3:
                 /* empty */;
             4'h4:
-                \wg2_freq$next [3:0] = data_in[3:0];
+                /* empty */;
             4'h5:
+                /* empty */;
+            4'h6:
+                \wg2_freq$next [3:0] = data_in[3:0];
+            4'h7:
                 \wg2_freq$next [7:4] = data_in[3:0];
+            4'h8:
+                \wg2_freq$next [11:8] = data_in[3:0];
           endcase
     endcase
   end
@@ -875,6 +887,12 @@ module registers(rst, data_in, we, wg1_freq_mark, wg1_freq_space, wg2_freq, wg_m
             4'h5:
                 /* empty */;
             4'h6:
+                /* empty */;
+            4'h7:
+                /* empty */;
+            4'h8:
+                /* empty */;
+            4'h9:
                 \wg_mux_cfg$next  = data_in[1:0];
           endcase
     endcase
@@ -900,9 +918,17 @@ module registers(rst, data_in, we, wg1_freq_mark, wg1_freq_space, wg2_freq, wg_m
             4'h6:
                 /* empty */;
             4'h7:
-                \mixer_freq$next [3:0] = data_in[3:0];
+                /* empty */;
             4'h8:
+                /* empty */;
+            4'h9:
+                /* empty */;
+            4'ha:
+                \mixer_freq$next [3:0] = data_in[3:0];
+            4'hb:
                 \mixer_freq$next [7:4] = data_in[3:0];
+            4'hc:
+                \mixer_freq$next [11:8] = data_in[3:0];
           endcase
     endcase
   end
@@ -931,6 +957,14 @@ module registers(rst, data_in, we, wg1_freq_mark, wg1_freq_space, wg2_freq, wg_m
             4'h8:
                 /* empty */;
             4'h9:
+                /* empty */;
+            4'ha:
+                /* empty */;
+            4'hb:
+                /* empty */;
+            4'hc:
+                /* empty */;
+            4'hd:
                 \frequency_invert$next  = data_in[0];
           endcase
     endcase
@@ -960,6 +994,14 @@ module registers(rst, data_in, we, wg1_freq_mark, wg1_freq_space, wg2_freq, wg_m
             4'h8:
                 /* empty */;
             4'h9:
+                /* empty */;
+            4'ha:
+                /* empty */;
+            4'hb:
+                /* empty */;
+            4'hc:
+                /* empty */;
+            4'hd:
                 \enforce_validity$next  = data_in[1];
           endcase
     endcase
@@ -972,8 +1014,8 @@ module rx(rst, in_, frequency, frequency_invert, out, valid, clk);
   wire \$5 ;
   input clk;
   wire clk;
-  input [9:0] frequency;
-  wire [9:0] frequency;
+  input [13:0] frequency;
+  wire [13:0] frequency;
   input frequency_invert;
   wire frequency_invert;
   wire glitch_filter_in_;
@@ -982,7 +1024,7 @@ module rx(rst, in_, frequency, frequency_invert, out, valid, clk);
   wire [8:0] i_filter_out;
   input in_;
   wire in_;
-  wire [9:0] mixer_frequency;
+  wire [13:0] mixer_frequency;
   wire mixer_i;
   wire mixer_in_;
   wire mixer_q;
@@ -1161,18 +1203,18 @@ module spi(rst, cs_n, sck, mosi, data, we, clk);
 endmodule
 
 module wg1(rst, frequency, out, clk);
-  wire [10:0] \$1 ;
-  wire [10:0] \$2 ;
-  reg [9:0] _state = 10'h000;
-  wire [9:0] \_state$next ;
+  wire [14:0] \$1 ;
+  wire [14:0] \$2 ;
+  reg [13:0] _state = 14'h0000;
+  wire [13:0] \_state$next ;
   input clk;
   wire clk;
-  input [9:0] frequency;
-  wire [9:0] frequency;
-  wire [9:0] lut_in_;
-  wire [9:0] lut_out;
-  output [9:0] out;
-  wire [9:0] out;
+  input [13:0] frequency;
+  wire [13:0] frequency;
+  wire [13:0] lut_in_;
+  wire [13:0] lut_out;
+  output [13:0] out;
+  wire [13:0] out;
   input rst;
   wire rst;
   assign \$2  = _state + frequency;
@@ -1183,24 +1225,24 @@ module wg1(rst, frequency, out, clk);
     .out(lut_out)
   );
   assign \$1  = \$2 ;
-  assign \_state$next  = \$2 [9:0];
+  assign \_state$next  = \$2 [13:0];
   assign out = lut_out;
   assign lut_in_ = _state;
 endmodule
 
 module wg2(rst, frequency, out, clk);
-  wire [10:0] \$1 ;
-  wire [10:0] \$2 ;
-  reg [9:0] _state = 10'h000;
-  wire [9:0] \_state$next ;
+  wire [14:0] \$1 ;
+  wire [14:0] \$2 ;
+  reg [13:0] _state = 14'h0000;
+  wire [13:0] \_state$next ;
   input clk;
   wire clk;
-  input [9:0] frequency;
-  wire [9:0] frequency;
-  wire [9:0] lut_in_;
-  wire [9:0] lut_out;
-  output [9:0] out;
-  wire [9:0] out;
+  input [13:0] frequency;
+  wire [13:0] frequency;
+  wire [13:0] lut_in_;
+  wire [13:0] lut_out;
+  output [13:0] out;
+  wire [13:0] out;
   input rst;
   wire rst;
   assign \$2  = _state + frequency;
@@ -1211,7 +1253,7 @@ module wg2(rst, frequency, out, clk);
     .out(lut_out)
   );
   assign \$1  = \$2 ;
-  assign \_state$next  = \$2 [9:0];
+  assign \_state$next  = \$2 [13:0];
   assign out = lut_out;
   assign lut_in_ = _state;
 endmodule
