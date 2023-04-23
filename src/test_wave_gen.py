@@ -30,7 +30,8 @@ async def bench(dut):
         total_power = np.sum(fft[1:] * fft[1:])
         fundamental_power = fft[frequency] * fft[frequency]
         thd = np.sqrt((total_power - fundamental_power) / fundamental_power)
-        assert thd < 0.2
+        print(thd)
+        assert thd < 0.05
 
 
 def test_wave_gen():

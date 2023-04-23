@@ -366,53 +366,123 @@ endmodule
 module lut(out, in_);
   reg \$auto$verilog_backend.cc:2083:dump_module$2  = 0;
   wire \$1 ;
-  wire [13:0] \$3 ;
-  wire [13:0] \$5 ;
-  wire [13:0] \$6 ;
+  wire [13:0] \$10 ;
+  wire [14:0] \$13 ;
+  wire [13:0] \$15 ;
+  wire [14:0] \$17 ;
+  wire \$19 ;
+  wire \$21 ;
+  wire [15:0] \$23 ;
+  wire [15:0] \$24 ;
+  wire [14:0] \$3 ;
+  wire [13:0] \$4 ;
+  wire [14:0] \$6 ;
+  wire [14:0] \$8 ;
+  wire [13:0] \$9 ;
+  reg [13:0] _temp1;
+  wire [14:0] _temp2;
   input [13:0] in_;
   wire [13:0] in_;
   output [13:0] out;
   reg [13:0] out;
+  assign \$9  = ~ \$10 ;
+  assign \$13  = \$9  - 14'h2000;
+  assign \$17  = $signed(_temp1) + $signed(\$15 );
   assign \$1  = ~ in_[13];
-  assign \$5  = ~ \$6 ;
+  assign \$19  = $signed(_temp2) < $signed(14'h2000);
+  assign \$21  = $signed(_temp2) >= $signed(15'h2000);
+  assign \$24  = $signed(_temp2) + $signed(15'h2000);
+  assign \$6  = \$4  - 14'h2000;
   always @* begin
     if (\$auto$verilog_backend.cc:2083:dump_module$2 ) begin end
     (* full_case = 32'd1 *)
     casez (\$1 )
       1'h1:
-          out = \$3 ;
+          _temp1 = \$6 [13:0];
       default:
-          out = \$5 ;
+          _temp1 = \$13 [13:0];
     endcase
   end
-  assign \$3  = { in_[12:0], 1'h0 };
-  assign \$6  = { in_[12:0], 1'h0 };
+  always @* begin
+    if (\$auto$verilog_backend.cc:2083:dump_module$2 ) begin end
+    (* full_case = 32'd1 *)
+    casez ({ \$21 , \$19  })
+      2'b?1:
+          out = 14'h0000;
+      2'b1?:
+          out = 14'h3fff;
+      default:
+          out = \$24 [13:0];
+    endcase
+  end
+  assign \$3  = \$6 ;
+  assign \$8  = \$13 ;
+  assign \$23  = \$24 ;
+  assign _temp2 = \$17 ;
+  assign \$4  = { in_[12:0], 1'h0 };
+  assign \$10  = { in_[12:0], 1'h0 };
+  assign \$15  = { _temp1[13], _temp1[13:1] };
 endmodule
 
 module \lut$1 (out, in_);
   reg \$auto$verilog_backend.cc:2083:dump_module$3  = 0;
   wire \$1 ;
-  wire [13:0] \$3 ;
-  wire [13:0] \$5 ;
-  wire [13:0] \$6 ;
+  wire [13:0] \$10 ;
+  wire [14:0] \$13 ;
+  wire [13:0] \$15 ;
+  wire [14:0] \$17 ;
+  wire \$19 ;
+  wire \$21 ;
+  wire [15:0] \$23 ;
+  wire [15:0] \$24 ;
+  wire [14:0] \$3 ;
+  wire [13:0] \$4 ;
+  wire [14:0] \$6 ;
+  wire [14:0] \$8 ;
+  wire [13:0] \$9 ;
+  reg [13:0] _temp1;
+  wire [14:0] _temp2;
   input [13:0] in_;
   wire [13:0] in_;
   output [13:0] out;
   reg [13:0] out;
+  assign \$9  = ~ \$10 ;
+  assign \$13  = \$9  - 14'h2000;
+  assign \$17  = $signed(_temp1) + $signed(\$15 );
   assign \$1  = ~ in_[13];
-  assign \$5  = ~ \$6 ;
+  assign \$19  = $signed(_temp2) < $signed(14'h2000);
+  assign \$21  = $signed(_temp2) >= $signed(15'h2000);
+  assign \$24  = $signed(_temp2) + $signed(15'h2000);
+  assign \$6  = \$4  - 14'h2000;
   always @* begin
     if (\$auto$verilog_backend.cc:2083:dump_module$3 ) begin end
     (* full_case = 32'd1 *)
     casez (\$1 )
       1'h1:
-          out = \$3 ;
+          _temp1 = \$6 [13:0];
       default:
-          out = \$5 ;
+          _temp1 = \$13 [13:0];
     endcase
   end
-  assign \$3  = { in_[12:0], 1'h0 };
-  assign \$6  = { in_[12:0], 1'h0 };
+  always @* begin
+    if (\$auto$verilog_backend.cc:2083:dump_module$3 ) begin end
+    (* full_case = 32'd1 *)
+    casez ({ \$21 , \$19  })
+      2'b?1:
+          out = 14'h0000;
+      2'b1?:
+          out = 14'h3fff;
+      default:
+          out = \$24 [13:0];
+    endcase
+  end
+  assign \$3  = \$6 ;
+  assign \$8  = \$13 ;
+  assign \$23  = \$24 ;
+  assign _temp2 = \$17 ;
+  assign \$4  = { in_[12:0], 1'h0 };
+  assign \$10  = { in_[12:0], 1'h0 };
+  assign \$15  = { _temp1[13], _temp1[13:1] };
 endmodule
 
 module mixer(rst, in_, frequency, i, q, clk);
